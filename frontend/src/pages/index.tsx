@@ -20,7 +20,7 @@ export default function Home() {
       style={{ paddingTop: started ? 60 : 300 }}
     >
       <div className="z-10 max-w-5xl w-full items-center justify-between lg:flex">
-        <div className="flex flex-col space-y-2">
+        <div className="flex flex-col space-y-2 w-full">
           <HeaderText shrink={started}>
             I am a <InlineInput onChange={setUser} disabled={started} />
           </HeaderText>
