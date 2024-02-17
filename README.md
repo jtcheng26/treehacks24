@@ -11,3 +11,13 @@ Activate the venv
 Install requirements
 
 `pip3 install -r requirements.txt`
+
+Start server:
+
+`uvicorn main:app --reload`
+
+## Manim Bullshit
+
+`brew install cairo pango ffmpeg mactex pkg-config`
+
+`pip install pycairo`
