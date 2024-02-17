@@ -65,10 +65,10 @@ export default function Content({ user, topic, reset }) {
         } flex justify-center items-center transition-all duration-200`}
         style={{ zIndex: done ? 1000 : -10, opacity: done ? 1 : 0 }}
       >
-        <ReplayButton onClick={reset} visible={done} />
+        <ReplayButton onClick={reset} visible={done} text='New Lesson' />
       </div>
       <ScaleLoader loading={loading} color="#4EB389" />
-      <div className={"flex flex-col space-y-2 transition-all duration-100"}>
+      <div className={"flex flex-col space-y-2 transition-all duration-100 overflow-hidden"}>
         <div
           className={`w-full flex justify-center items-center h-[450px] ${
             loading ? "hidden" : "block"

@@ -1,7 +1,11 @@
 import React from "react";
 import SecondaryButton from "./SecondaryButton";
 
-export default function ReplayButton({ onClick, visible = true }) {
+export default function ReplayButton({
+  onClick,
+  visible = true,
+  text = "Replay",
+}) {
   return (
     <SecondaryButton onClick={onClick} visible={visible}>
       <div className="flex flex-row space-x-2 items-center text-sm transition-all duration-200">
@@ -11,7 +15,11 @@ export default function ReplayButton({ onClick, visible = true }) {
           viewBox="0 0 24 24"
           strokeWidth={1.5}
           stroke="currentColor"
-          className={visible ? "w-5 h-5 transition-all duration-200" : "w-0 h-5 transition-all duration-200"}
+          className={
+            visible
+              ? "w-5 h-5 transition-all duration-200"
+              : "w-0 h-5 transition-all duration-200"
+          }
         >
           <path
             strokeLinecap="round"
@@ -19,7 +27,15 @@ export default function ReplayButton({ onClick, visible = true }) {
             d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"
           />
         </svg>
-        <span className={visible ? "opacity-100 transition-all duration-200" : "opacity-0 transition-all duration-200"}>Replay</span>
+        <span
+          className={
+            visible
+              ? "opacity-100 transition-all duration-200"
+              : "opacity-0 transition-all duration-200"
+          }
+        >
+          {text}
+        </span>
       </div>
     </SecondaryButton>
   );
