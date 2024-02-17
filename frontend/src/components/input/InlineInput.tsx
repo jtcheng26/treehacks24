@@ -4,6 +4,7 @@ export default function InlineInput({
   onSubmit = (str: string) => {},
   onChange = (str: string) => {},
   disabled = false,
+  value = "",
 }) {
   function handleChange(e) {
     onChange(e.target.value);
@@ -16,6 +17,7 @@ export default function InlineInput({
       className="text-primary bg-transparent outline-none placeholder-white"
       disabled={disabled}
       type="text"
+      value={value}
       placeholder="__________"
       onChange={handleChange}
       onKeyDown={handleSubmit}
