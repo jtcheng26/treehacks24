@@ -31,7 +31,8 @@ config = toml.load("config.toml")
 
 
 async def generate_scene(item, i=0):
-    if i > 4:
+    global scenes
+    if i > 5:
         return
     print("Generating scene: ", item["id"], item["title"])
 
@@ -141,7 +142,7 @@ async def generate_video(item_id: str, i=0):
         command = [
             "manim",
             f"scene_code/scene_{item_id}.py",
-            "-pql",
+            "-ql",
             "-o",
             pathlib.Path(__file__).parent /
             "scene_code" / f"scene_{item_id}",
@@ -159,12 +160,14 @@ async def generate_video(item_id: str, i=0):
 
             return process.returncode, stdout.decode(), stderr.decode()
         exitcode, stdout, stderr = await run_command(command)
+
         print("EXITCODE", exitcode)
         print(stdout)
         print("STDERRRR", stderr)
-        if stderr != '' or not os.path.exists(f"scene_code/scene_{item_id}.mp4"):
-            print("NO FILE FOUND", item_id)
-            await generate_scene(scenes[item_id], i + 1)
+        if (exitcode != 0):
+            if stderr != '' or not os.path.exists(f"scene_code/scene_{item_id}.mp4"):
+                print("NO FILE FOUND", item_id)
+                await generate_scene(scenes[item_id], i + 1)
 
     except subprocess.CalledProcessError as e:
         print("Error: ", e)
@@ -349,36 +352,44 @@ async def init(audience: str = "high school student", concept: str = "vector add
     storyboard_query_save.append(query_save)
 
     # storyboards = json.loads(response["text"][0])["frames"]
-    valid = True
+    # valid = True
+    # text = extract_code_blocks(uh, r'```python(.*?)```')
+    # res2 = extract_code_blocks(uh, r'```(.*?)```')
+    # if len(res) and len(res[0]):
+    #     res = textwrap.dedent(res[0]).rstrip()
+    # with open('tempsdf', 'w') as w:
+    #     w.write(response)
 
-    while not valid:
-        try:
-            print("Trying to parse JSON...")
-            print(response.keys())
-            text = response["text"][0]
-            # remove everything before the first {
-            text = text[text.index("{"):]
-            # remove everything after the last }
-            text = text[: text.rindex("}") + 1]
-            print(text)
-            storyboards = json.loads(text)["frames"]
-            valid = True
-        except json.JSONDecodeError as e:
-            formatted_prompt += (
-                "\n\n"
-                + response["text"][0]
-                + "\n\nTHIS IS NOT VALID JSON. PLEASE FIX IT. RETURN ONLY A VALID JSON FORMAT."
-            )
-            print("Invalid JSON")
-            print(formatted_prompt)
-            response = run_in_threadpool(query_gpt, formatted_prompt, False)
+    # while not valid:
+    #     try:
+    #         print("Trying to parse JSON...")
+    #         print(response.keys())
+    #         text = response["text"][0]
+    #         # remove everything before the first {
+    #         text = text[text.index("{"):]
+    #         # remove everything after the last }
+    #         text = text[: text.rindex("}") + 1]
+    #         print(text)
+    #         storyboards = json.loads(text)["frames"]
+    #         valid = True
+    #     except json.JSONDecodeError as e:
+    #         formatted_prompt += (
+    #             "\n\n"
+    #             + response["text"][0]
+    #             + "\n\nTHIS IS NOT VALID JSON. PLEASE FIX IT. RETURN ONLY A VALID JSON FORMAT."
+    #         )
+    #         print("Invalid JSON")
+    #         print(formatted_prompt)
+    #         response = run_in_threadpool(query_gpt, formatted_prompt, False)
 
     storyboards = response["frames"]
+    with open('uuids.txt', 'w') as w:
+        w.write(json.dumps(storyboards))
 
     for storyboard in storyboards:
-        id = str(uuid.uuid4())
-        scenes[id] = storyboard
-        storyboard["id"] = id
+        id_s = str(uuid.uuid4())
+        scenes[id_s] = storyboard
+        storyboard["id"] = id_s
         asyncio.create_task(generate_scene(storyboard))
 
     return storyboards

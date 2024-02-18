@@ -56,7 +56,7 @@ THE RESPONSE SHOULD ONLY A VALID PLAINTEXT JSON FORMAT. DO NOT OUTPUT MARKDOWN. 
 """
 
 ANIMATION_PROMPT = """
-1. Given the scene description, write manim (CE) code for this scene in 3blue1brown style. This scene should be between 5 and 10 seconds. This scene should contain and render a short text blurb describing the scene.
+1. Given the scene description, write manim code for this scene in 3blue1brown style. This scene should be between 5 and 10 seconds. This scene should contain and render a short text blurb describing the scene.
 2. Make sure that the any LaTeX equations are rendered correctly.
 3. Make sure that the font_size is small (< 25pt).
 4. Make sure no manim objects have the same y coordinate to ensure no overlapping.
