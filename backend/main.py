@@ -1,4 +1,5 @@
 import os
+import re
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -11,6 +12,10 @@ import requests
 import asyncio
 import uuid
 import aiohttp
+
+import pathlib
+
+import subprocess
 
 import time
 
@@ -28,6 +33,11 @@ async def process_queue():
 
 loop = asyncio.get_event_loop()
 loop.create_task(process_queue())
+
+app = FastAPI()
+
+
+config = toml.load("config.toml")
 
 
 async def generate_scene(item):
@@ -54,7 +64,7 @@ async def generate_scene(item):
             print("Trying to parse JSON...")
             text = scene_response["text"][0]
             # remove everything before the first {
-            text = text[text.index("{"):]
+            text = text[text.index("{") :]
             # remove everything after the last }
             text = text[: text.rindex("}") + 1]
             print(text)
@@ -98,19 +108,43 @@ async def generate_scene(item):
         json.dump(scenes, f, indent=4)
 
 
-async def generate_video(item_id):
+@app.get("/api/generate")
+async def generate_video(item_id: str):
     print("Generating video: ", item_id)
+
+    scenes = json.load(open("scenes.json"))
     # Generate the video from the code
 
-    with open(f"scene_{item_id}.py", "w") as f:
-        f.write(scenes[item_id]["code"])
+    with open(f"scene_code/scene_{item_id}.py", "w") as f:
+        f.write(scenes[item_id]["code"].strip())
 
     # Run the manim command
     try:
-        os.system(f"manim scene_{item_id}.py -o -lq scene_{item_id}.mp4")
-    except Exception as e:
+        # # log all output
+        # cmd_output = os.system(f"manim scene_{item_id}.py -o -lq scene_{item_id}.mp4")
+
+        # os.system(f"manim scene_{item_id}.py -o -lq scene_{item_id}.mp4")
+        print("new")
+
+        command = [
+            "manim",
+            f"scene_code/scene_{item_id}.py",
+            "-ql",
+            "-o",
+            pathlib.Path(__file__).parent() / "scene_code" / f"scene_{item_id}",
+        ]
+        result = subprocess.run(command, capture_output=True, text=True)
+
+        print("what")
+
+        print(result.stdout)
+    except subprocess.CalledProcessError as e:
         print("Error: ", e)
+        print(e.stderr)
+        print("llll")
     # todo: deal with what happens when it errors out
+
+    print("done")
 
     # Do something with audio generation
     # todo:
@@ -209,7 +243,7 @@ def query_llm(prompt: str, is_code: bool = False):
         config[f"{model}_url"] + "/generate",
         headers=headers,
         json=payload_body,
-        verify=False
+        verify=False,
     )
 
     return response.json()
@@ -223,13 +257,10 @@ def query_gpt(prompt: str):
         "messages": [
             {
                 "role": "system",
-                "content": "You are a helpful assistant for automating responses."
+                "content": "You are a helpful assistant for automating responses.",
             },
-            {
-                "role": "user",
-                "content": prompt
-            }
-        ]
+            {"role": "user", "content": prompt},
+        ],
     }
 
     headers = {
@@ -248,10 +279,10 @@ def query_gpt(prompt: str):
     )
     res = response.json()
     print(res)
-    if 'choices' not in res:
-        return ''
+    if "choices" not in res:
+        return ""
 
-    return res['choices'][0]['message']["content"]
+    return res["choices"][0]["message"]["content"]
 
 
 @app.get("/")
@@ -266,12 +297,12 @@ scenes = {}
 @app.get("/api/init/")
 async def init(audience: str = "high school student", concept: str = "vector addition"):
     global scenes
-    with open('./scenes.json', 'r') as r:
+    with open("./scenes.json", "r") as r:
         scene = json.load(r)  # d
         scenes = scene
-    
+
     time.sleep(0.5)  # d
-    
+
     return list(scene.values())  # d
     formatted_prompt = prompts.STORYBOARD_PROMPT.format(audience, concept)
 
@@ -296,7 +327,7 @@ async def init(audience: str = "high school student", concept: str = "vector add
             print("Trying to parse JSON...")
             text = response["text"][0]
             # remove everything before the first {
-            text = text[text.index("{"):]
+            text = text[text.index("{") :]
             # remove everything after the last }
             text = text[: text.rindex("}") + 1]
             print(text)
@@ -349,6 +380,7 @@ async def video(scene_id: str):
 
     return fastapi.responses.FileResponse(f"scene_{scene_id}.mp4")
 
+
 # check freeform text answers
 
 
@@ -357,7 +389,8 @@ async def check_answer(request: Request):
     data = await request.json()
     print(data)
     formatted_prompt = prompts.CHECK_ANSWER_PROMPT.format(
-        data['answer'], data['question'])
+        data["answer"], data["question"]
+    )
 
     print(formatted_prompt)
 

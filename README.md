@@ -14,7 +14,7 @@ Install requirements
 
 Start server:
 
-`uvicorn main:app --reload`
+`uvicorn main:app --reload --reload-exclude='scene_code/*'`
 
 ## Manim Bullshit
 
