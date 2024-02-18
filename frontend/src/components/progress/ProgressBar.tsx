@@ -1,5 +1,6 @@
 import { Section } from "@/hooks/useManim";
 import React from "react";
+import { PulseLoader } from "react-spinners";
 
 export default function ProgressBar({
   active,
@@ -10,8 +11,22 @@ export default function ProgressBar({
   section: Section;
   visible: boolean;
 }) {
+  if (!section.ready && active && visible)
+    return (
+      <span className="col-span-1 flex justify-center items-center">
+        <PulseLoader
+          color={
+            section.title.slice(0, 11) === "Explanation"
+              ? "rgb(251 146 60)"
+              : "rgb(78 179 137)"
+          }
+          size="8px"
+        />
+      </span>
+    );
+  if (!visible) return "";
   return (
-    <div className="flex flex-col items-center col-span-1 text-sm space-y-1">
+    <div className="flex flex-col items-center justify-end col-span-1 text-xs space-y-1">
       <span
         className={`font-bold ${
           section.title.slice(0, 11) === "Explanation"

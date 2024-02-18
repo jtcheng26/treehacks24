@@ -2,3 +2,5 @@ fastapi
 uvicorn
 manimgl
 pycairo
+toml
+aiohttp

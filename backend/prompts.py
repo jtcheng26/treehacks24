@@ -78,3 +78,15 @@ Animation Description:
 
 ONLY RETURN THE MANIM CODE FOR THE SCENE. DO NOT INCLUDE A PREABMBLE OR POSTAMBLE.
 """
+
+CHECK_ANSWER_PROMPT = """
+1. Given a Question and a user's Answer, return YES if the answer is reasonably correct and NO otherwise. Be lenient.
+2. Return nothing other than the string YES or NO.
+3. If the question is Is this helpful?, then return YES only if the answer is affirmative.
+
+Answer:
+{}
+
+Question:
+{}
+"""
