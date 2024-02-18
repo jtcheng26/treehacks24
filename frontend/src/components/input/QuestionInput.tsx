@@ -1,15 +1,22 @@
-import React from "react";
+import React, { useRef } from "react";
 
 export default function QuestionInput({
-  onSubmit = (str: string) => {},
+  onSubmit = (str: string, callback: () => void) => {},
   onFocus = () => {},
   onUnfocus = () => {},
   visible = true,
   placeholder = "I have a question...",
-  maxWidth = '500px',
+  maxWidth = "500px",
 }) {
+  const inputRef = useRef(null);
   function handleSubmit(e) {
-    if (e.key === "Enter") onSubmit(e.target.value);
+    if (e.key === "Enter")
+      onSubmit(e.target.value, () => {
+        if (inputRef) {
+          inputRef.current.value = "";
+          inputRef.current.blur();
+        }
+      });
   }
   function handleFocus(e) {
     onFocus();
@@ -26,6 +33,7 @@ export default function QuestionInput({
       onKeyDown={handleSubmit}
       onFocus={handleFocus}
       onBlur={handleUnfocus}
+      ref={inputRef}
     ></input>
   );
 }

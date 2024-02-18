@@ -17,17 +17,20 @@ export default function TextQuizQuestion({
   visible,
 }: {
   config?: TextQuestionConfig;
-  onAnswer: (correct: boolean) => void;
+  onAnswer: (correct: boolean, question: string, callback?: () => void) => void;
   visible: boolean;
 }) {
   const [state, setState] = useState(UNANSWERED);
-  function handleAnswer(answer: string) {
+  useEffect(() => {
+    setState(UNANSWERED);
+  }, [config]);
+  function handleAnswer(answer: string, callback: () => void) {
     console.log("Submitting quiz answer", answer);
     setState(LOADING);
     // TODO: query answer
     setTimeout(() => {
       setState(CORRECT);
-      onAnswer(true);
+      onAnswer(true, config.question, callback);
     }, 1000);
   }
   return (
@@ -39,9 +42,7 @@ export default function TextQuizQuestion({
         {visible ? "Brief Response" : ""}
       </span>
       <div className="border-primary border-2 rounded-lg p-4 flex-col flex space-y-4">
-        <span className="text-slate-400">
-          {visible ? config.question : "4EB389"}
-        </span>
+        <span className="text-slate-400">{visible ? config.question : ""}</span>
         <QuestionInput
           onSubmit={handleAnswer}
           maxWidth={"100%"}

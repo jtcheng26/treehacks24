@@ -24,6 +24,8 @@ export default function ProgressBars({
     8: "grid-cols-8",
     9: "grid-cols-9",
     10: "grid-cols-10",
+    11: "grid-cols-11",
+    12: "grid-cols-12",
   };
   return (
     <div

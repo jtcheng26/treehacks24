@@ -1,7 +1,7 @@
 import { QuizConfig } from "@/components/content/Content";
 import { MCQuestionConfig } from "@/components/practice/MCQuizQuestion";
 import { TextQuestionConfig } from "@/components/practice/TextQuizQuestion";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 /*
 TODO: do the parentheses
@@ -21,7 +21,7 @@ export interface Section {
   };
   question: {
     // from backend
-    type: "mc" | "text";
+    type: "mc" | "text" | "skip";
     data: MCQuestionConfig | TextQuestionConfig; // or other types
   };
   video: string; // or stream, from backend
@@ -32,6 +32,13 @@ export interface SectionList {
   sections: Section[];
   ready: boolean;
 }
+
+const initialProgressState = {
+  played: 0,
+  loaded: 0,
+  playedSeconds: 0,
+  loadedSeconds: 0,
+};
 
 export default function useManim(user: string, topic: string) {
   const [state, setState] = useState<SectionList>({
@@ -48,18 +55,42 @@ export default function useManim(user: string, topic: string) {
             answer: -1,
           },
         },
-        progressState: {
-          played: 0,
-          loaded: 0,
-          playedSeconds: 0,
-          loadedSeconds: 0,
-        },
+        progressState: initialProgressState,
       },
     ],
     ready: false,
   });
+  const numExplain = useRef(1);
 
-  function update(prompt: string) {}
+  function update(i: number, prompt: string) {
+    setState({
+      ready: true,
+      sections: state.sections
+        .slice(0, i)
+        .concat([
+          {
+            ...state.sections[i],
+            question: { ...state.sections[i].question, type: "skip" },
+          },
+        ])
+        .concat([
+          { // note: 2 explanations in a row won't work until videos are different
+            title: "Explanation " + numExplain.current,
+            ready: true,
+            video: "/LinearAlgebraOther.mp4",
+            question: {
+              type: "text",
+              data: {
+                question: "Is this helpful?",
+              },
+            },
+            progressState: initialProgressState,
+          } as Section,
+        ])
+        .concat(state.sections.slice(i + 1)),
+    });
+    numExplain.current++;
+  }
 
   function updateProgress(checkpoint: number, progressState) {
     setState({
