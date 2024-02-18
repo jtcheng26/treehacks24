@@ -14,7 +14,7 @@ def generate_video_from_code(code_str, output_filename):
     """
     # Dedent and strip the code string to ensure it's properly formatted
     code_str = textwrap.dedent(code_str).strip()
-
+    print(code_str)
     # Attempt to extract the scene class name using regex
     match = re.search(r"class (\w+)\(Scene\):", code_str)
     if not match:
