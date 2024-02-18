@@ -143,7 +143,7 @@ for scene_id, scene_details in scenes.items():
     # This part is highly dependent on your setup and the specifics of the manim code provided
     # For the sake of example, let's assume you have a function that handles this:
     mp4_filename = generate_video_from_code(scene_details["data"]["code"], "output")  # This is a placeholder function
-    
+    print("MP4" + mp4_filename)
     # Combine audio and video if both files exist
     if os.path.exists(mp4_filename) and os.path.exists(mp3_filename):
         videoclip = VideoFileClip(mp4_filename)
