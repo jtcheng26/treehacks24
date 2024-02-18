@@ -87,7 +87,7 @@ async def generate_scene(item):
     scenes[item["id"]]["code"] = animation_code
 
     # Generate the video
-    generate_video(item["id"])
+    await generate_video(item["id"])
 
     # Write the data to a file
     with open("scenes.json", "w") as f:
@@ -123,6 +123,7 @@ config = toml.load("config.toml")
 
 
 async def async_query_llm(prompt: str, is_code: bool = False):
+    return query_llm(prompt, is_code)
     # model = "c" if is_code else "codellama"
     model = "mixtral"
 
