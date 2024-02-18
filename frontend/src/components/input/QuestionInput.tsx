@@ -12,7 +12,7 @@ export default function QuestionInput({
   function handleSubmit(e) {
     if (e.key === "Enter")
       onSubmit(e.target.value, () => {
-        if (inputRef) {
+        if (inputRef.current) {
           inputRef.current.value = "";
           inputRef.current.blur();
         }

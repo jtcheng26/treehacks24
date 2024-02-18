@@ -51,17 +51,19 @@ export default function Content({ user, topic, reset }) {
   function handleUnfocus() {
     if (data[currentSection].progressState.played < 1) setPlaying(true);
   }
-  function handleQuizAnswer(
+  async function handleQuizAnswer(
     correct: boolean,
     question: string,
     callback?: () => void
   ) {
     setShowReplay(false);
     if (!correct)
-      update(
+      await update(
         currentSection,
-        "I don't understand this question and I got it wrong: " + question
+        "I don't understand this question and I got it wrong: " + question,
+        false
       );
+
     setTimeout(() => {
       setShowQuestion(false);
       setTimeout(() => {
@@ -78,6 +80,7 @@ export default function Content({ user, topic, reset }) {
     setCurrentSection(currentSection + 1);
     setPlaying(true);
   }
+  const initialLoading = loading || !data.length || !data[0].ready;
   return (
     <div className="w-full h-full flex flex-col">
       <div
@@ -88,7 +91,7 @@ export default function Content({ user, topic, reset }) {
       >
         <ReplayButton onClick={reset} visible={done} text="New Lesson" />
       </div>
-      <ScaleLoader loading={loading} color="#4EB389" />
+      <ScaleLoader loading={initialLoading} color="#4EB389" />
       <div
         className={
           "flex flex-col space-y-2 transition-all duration-100 overflow-hidden"
@@ -96,12 +99,12 @@ export default function Content({ user, topic, reset }) {
       >
         <div
           className={`w-full flex justify-center items-center h-[450px] ${
-            loading ? "hidden" : "block"
+            initialLoading ? "hidden" : "block"
           }`}
         >
           <Player
             url={data[currentSection].video}
-            playing={playing}
+            playing={!initialLoading && playing}
             playerRef={playerRef}
             onProgress={handleProgress}
           />
@@ -121,10 +124,10 @@ export default function Content({ user, topic, reset }) {
             <Skip callback={skipQuestion} visible={showQuestion} />
           )}
         </div>
-        <div className="w-full flex flex-row items-center space-x-4 justify-center pb-6">
+        <div className="w-full flex flex-row items-center space-x-4 justify-center pb-4">
           <ReplayButton onClick={handleReplay} visible={showReplay} />
           <QuestionInput
-            visible={!loading}
+            visible={!initialLoading}
             onSubmit={handleQuestion}
             onFocus={handleFocus}
             onUnfocus={handleUnfocus}
@@ -134,7 +137,7 @@ export default function Content({ user, topic, reset }) {
           <ProgressBars
             currentSection={currentSection}
             sections={data}
-            visible={!loading}
+            visible={!initialLoading}
           />
         </div>
       </div>

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import QuestionInput from "../input/QuestionInput";
 import { BarLoader } from "react-spinners";
+import { postQuestionAnswer } from "../requests/post";
 
 export interface TextQuestionConfig {
   question: string;
@@ -24,14 +25,18 @@ export default function TextQuizQuestion({
   useEffect(() => {
     setState(UNANSWERED);
   }, [config]);
-  function handleAnswer(answer: string, callback: () => void) {
+  async function handleAnswer(answer: string, callback: () => void) {
     console.log("Submitting quiz answer", answer);
     setState(LOADING);
     // TODO: query answer
-    setTimeout(() => {
+    const res = await postQuestionAnswer(config.question, answer);
+    if ((await res.text()) === "NO") {
+      setState(INCORRECT);
+      onAnswer(false, config.question, callback);
+    } else {
       setState(CORRECT);
       onAnswer(true, config.question, callback);
-    }, 1000);
+    }
   }
   return (
     <div

@@ -1,5 +1,7 @@
 import os
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+
 import json
 
 import fastapi
@@ -9,6 +11,8 @@ import requests
 import asyncio
 import uuid
 import aiohttp
+
+import time
 
 # Event loop for querying each scene
 
@@ -50,7 +54,7 @@ async def generate_scene(item):
             print("Trying to parse JSON...")
             text = scene_response["text"][0]
             # remove everything before the first {
-            text = text[text.index("{") :]
+            text = text[text.index("{"):]
             # remove everything after the last }
             text = text[: text.rindex("}") + 1]
             print(text)
@@ -117,6 +121,16 @@ async def generate_video(item_id):
 
 
 app = FastAPI()
+
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 config = toml.load("config.toml")
@@ -195,9 +209,49 @@ def query_llm(prompt: str, is_code: bool = False):
         config[f"{model}_url"] + "/generate",
         headers=headers,
         json=payload_body,
+        verify=False
     )
 
-    return json.loads(response.json())
+    return response.json()
+
+
+def query_gpt(prompt: str):
+    # model = "mixtral" if is_code else "codellama"
+
+    payload_body = {
+        "model": "gpt-3.5-turbo",
+        "messages": [
+            {
+                "role": "system",
+                "content": "You are a helpful assistant for automating responses."
+            },
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ]
+    }
+
+    headers = {
+        "accept": "application/json",
+        "Authorization": f"Bearer {config[f'openai_auth_token']}",
+        "Content-Type": "application/json",
+    }
+
+    # print(headers)
+    # print(payload_body)
+
+    response = requests.post(
+        "https://api.openai.com/v1/chat/completions",
+        headers=headers,
+        json=payload_body,
+    )
+    res = response.json()
+    print(res)
+    if 'choices' not in res:
+        return ''
+
+    return res['choices'][0]['message']["content"]
 
 
 @app.get("/")
@@ -211,6 +265,14 @@ scenes = {}
 
 @app.get("/api/init/")
 async def init(audience: str = "high school student", concept: str = "vector addition"):
+    global scenes
+    with open('./scenes.json', 'r') as r:
+        scene = json.load(r)  # d
+        scenes = scene
+    
+    time.sleep(0.5)  # d
+    
+    return list(scene.values())  # d
     formatted_prompt = prompts.STORYBOARD_PROMPT.format(audience, concept)
 
     print(formatted_prompt)
@@ -234,7 +296,7 @@ async def init(audience: str = "high school student", concept: str = "vector add
             print("Trying to parse JSON...")
             text = response["text"][0]
             # remove everything before the first {
-            text = text[text.index("{") :]
+            text = text[text.index("{"):]
             # remove everything after the last }
             text = text[: text.rindex("}") + 1]
             print(text)
@@ -286,3 +348,23 @@ async def video(scene_id: str):
         return {"error": "Video not found"}
 
     return fastapi.responses.FileResponse(f"scene_{scene_id}.mp4")
+
+# check freeform text answers
+
+
+@app.post("/api/text_answer")
+async def check_answer(request: Request):
+    data = await request.json()
+    print(data)
+    formatted_prompt = prompts.CHECK_ANSWER_PROMPT.format(
+        data['answer'], data['question'])
+
+    print(formatted_prompt)
+
+    # response = query_llm(formatted_prompt, False)
+
+    response = query_gpt(formatted_prompt)
+    # response = "YES"
+    # print(response)
+
+    return fastapi.responses.PlainTextResponse(response)
