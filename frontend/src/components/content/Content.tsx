@@ -9,6 +9,7 @@ import ProgressBars from "../progress/ProgressBars";
 import TextQuizQuestion, {
   TextQuestionConfig,
 } from "../practice/TextQuizQuestion";
+import Skip from "../practice/Skip";
 
 export const QuizConfig = {
   question: "What is the result of multiplying a 3x2 matrix by a 2x4 matrix?",
@@ -38,9 +39,11 @@ export default function Content({ user, topic, reset }) {
       setShowReplay(true);
     }
   }
-  function handleQuestion(prompt: string) {
+  function handleQuestion(prompt: string, callback) {
     // TODO: update next video slot
     console.log("Submitted question:", prompt);
+    update(currentSection, prompt);
+    callback();
   }
   function handleFocus() {
     setPlaying(false);
@@ -48,23 +51,38 @@ export default function Content({ user, topic, reset }) {
   function handleUnfocus() {
     if (data[currentSection].progressState.played < 1) setPlaying(true);
   }
-  function handleQuizAnswer(correct: boolean) {
+  function handleQuizAnswer(
+    correct: boolean,
+    question: string,
+    callback?: () => void
+  ) {
     setShowReplay(false);
+    if (!correct)
+      update(
+        currentSection,
+        "I don't understand this question and I got it wrong: " + question
+      );
     setTimeout(() => {
       setShowQuestion(false);
       setTimeout(() => {
-        // TODO: set end screen
+        if (callback) callback();
         if (currentSection < data.length - 1)
           setCurrentSection(currentSection + 1);
         else setDone(true);
       }, 1000);
     }, 3000);
   }
+  function skipQuestion() {
+    setShowReplay(false);
+    setShowQuestion(false);
+    setCurrentSection(currentSection + 1);
+    setPlaying(true);
+  }
   return (
     <div className="w-full h-full flex flex-col">
       <div
         className={`absolute top-0 left-0 right-0 bottom-0 w-screen h-screen ${
-          done ? "backdrop-blur-lg" : "backdrop-blur-0"
+          done ? "backdrop-blur-xl" : "backdrop-blur-0"
         } flex justify-center items-center transition-all duration-200`}
         style={{ zIndex: done ? 1000 : -10, opacity: done ? 1 : 0 }}
       >
@@ -93,12 +111,14 @@ export default function Content({ user, topic, reset }) {
               onAnswer={handleQuizAnswer}
               visible={showQuestion}
             />
-          ) : (
+          ) : data[currentSection].question.type === "text" ? (
             <TextQuizQuestion
               config={data[currentSection].question.data as TextQuestionConfig}
               onAnswer={handleQuizAnswer}
               visible={showQuestion}
             />
+          ) : (
+            <Skip callback={skipQuestion} visible={showQuestion} />
           )}
         </div>
         <div className="w-full flex flex-row items-center space-x-4 justify-center pb-6">

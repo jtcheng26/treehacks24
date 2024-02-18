@@ -14,7 +14,7 @@ export default function MCQuizQuestion({
   visible,
 }: {
   config?: MCQuestionConfig;
-  onAnswer: (correct: boolean) => void;
+  onAnswer: (correct: boolean, question: string) => void;
   visible: boolean;
 }) {
   const [chosen, setChosen] = useState(-1);
@@ -23,7 +23,7 @@ export default function MCQuizQuestion({
   }, [config]);
   function handleAnswer(i: number) {
     setChosen(i);
-    onAnswer(i === config.answer);
+    onAnswer(i === config.answer, config.question);
   }
   function choiceStyle(i: number) {
     if (chosen === -1) return "bg-slate-800";
