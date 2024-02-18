@@ -1,8 +1,9 @@
 from fastapi import FastAPI
-import together
+
+# import together
 import json
 
-together.api_key = "9fcd816a3e4499c7b604182d817edbf800dacf99e869d37fd1ce32f039350752"
+# together.api_key = "9fcd816a3e4499c7b604182d817edbf800dacf99e869d37fd1ce32f039350752"
 
 app = FastAPI()
 
