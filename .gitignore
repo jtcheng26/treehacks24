@@ -3,3 +3,5 @@
 **/WIP_*.**
 
 backend/media/*
+
+backend/config.toml

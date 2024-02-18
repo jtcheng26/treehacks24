@@ -1,40 +1,77 @@
 from fastapi import FastAPI
-
-# import together
 import json
+import prompts
+import toml
+import requests
+import asyncio
+import uuid
 
-# together.api_key = "9fcd816a3e4499c7b604182d817edbf800dacf99e869d37fd1ce32f039350752"
+
+# Event loop for querying each scene
+
+queue = asyncio.Queue()
+
+
+async def process_queue():
+    while True:
+        item = await queue.get()
+        await generate_scene(item)
+        queue.task_done()
+
+
+async def generate_scene(item):
+    # item has, key, title and description
+
+    # Generate the scene information
+    scene_query = prompts.SCENE_AGENT_PROMPT.format(item["description"])
+    scene_response = query_llm(scene_query, False)
+
+    scene_data = json.loads(scene_response["text"][0])
+
+    scenes[item[item["id"]]]["data"] = scene_data
+
 
 app = FastAPI()
 
-prompt = """[INST] For an audience of a {}, generate a series of frames to explain {}  Each frame should be a single animation point, such as visualizing squaring number visually or adding a vector tip to tail. It should not take longer than 15 seconds.
 
-For example, explaining a vector addition would be:
-1. Frame showing 2 vectors from the origin explaining that these can be any arbitary vector
-2. Moving the second vector to the tip of the first vector and draw a resulting vector
-3. Showing vector addition numerically, adding each component numerically
-4. Explain a simple practical example of vector addition, how 2 forces can combine togehter into a larger force.
+config = toml.load("config.toml")
 
-Do not include a frame for a quiz. 
 
-Each frame should come with a short description of what it will talk about. This is meant to be the storyboard for an animated video explaining this concept. 
+def query_llm(prompt: str, is_code: bool = False):
+    model = "mixtal" if is_code else "codellama"
 
-Format the frames in a json format: 
+    payload_body = {
+        "input_variables": {"prompt": prompt},
+        # "prompt": prompt,
+        "stream": False,
+        "max_tokens": 8192,
+        "n": 1,
+        "best_of": 1,
+        "presence_penalty": 0,
+        "frequency_penalty": 0,
+        "repetition_penalty": 1,
+        "temperature": 0.7,
+        "top_p": 1,
+        "top_k": -1,
+        "min_p": 0,
+        "use_beam_search": False,
+        "length_penalty": 1,
+        "early_stopping": False,
+    }
 
-[
-{{
-"title": "xxxx",
-"description": "xxxx"
-}},
-]
+    headers = {
+        "accept": "application/json",
+        "Authorization": f"Bearer {config[f'{model}_auth_token']}",
+        "Content-Type": "application/json",
+    }
 
-The title should be short, limit of 5 words
-The description should be a few sentences, enough for someone to understand what to do and how to animate and explain this frame.
+    response = requests.post(
+        config[f"{model}_url"] + "/generate",
+        headers=headers,
+        json=payload_body,
+    )
 
-Output only the json format of the frames. DO NOT INCUDE A PREABMBLE OR POSTAMBLE. [/INST]
-"""
-
-MODEL = "mistralai/Mixtral-8x7B-Instruct-v0.1"
+    return json.loads(response.json())
 
 
 @app.get("/")
@@ -42,27 +79,42 @@ async def root():
     return {"message": "Hello World"}
 
 
-cached_storyboard = {}
+storyboard_query_save = []
+scenes = {}
 
 
-@app.get("/api/init")
+@app.get("/api/init/")
 async def init(audience: str = "high school student", concept: str = "vector addition"):
-    formatted = prompt.format(audience, concept)
+    formatted_prompt = prompts.STORYBOARD_PROMPT.format(audience, concept)
 
-    output = together.Complete.create(
-        prompt=formatted,
-        model=MODEL,
-        max_tokens=2048,
-        temperature=0.7,
-        top_p=0.5,
-        top_k=50,
-        repetition_penalty=1.0,
-        stop=["</s>", "[/INST]"],
-    )
+    print(formatted_prompt)
 
-    data = json.loads(output["output"]["choices"][0]["text"])
+    response = query_llm(formatted_prompt, False)
 
-    global cached_storyboard
-    cached_storyboard = data
+    query_save = {
+        "prompt": formatted_prompt,
+        "response": response,
+    }
 
-    return data
+    storyboard_query_save.append(query_save)
+
+    storyboards = json.loads(response["text"][0])
+
+    for storyboard in storyboards:
+        scenes[str(uuid.uuid4())] = storyboard
+        storyboard["id"] = str(uuid.uuid4())
+
+    return storyboards
+
+
+@app.get("/api/testing")
+async def testing(testing: str = "default testing string"):
+    return testing
+
+
+@app.get("/api/scene/{scene_id}")
+async def scene(scene_id: str):
+    if scene_id not in scenes:
+        return {"error": "Scene not found"}
+
+    return scenes[scene_id]

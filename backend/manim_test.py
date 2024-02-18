@@ -3,6 +3,95 @@ import numpy as np
 import random
 
 
+class Testing(Scene):
+    def construct(self):
+        a_21 = Tex(
+            r"a_{21}",
+            font_size=20,
+        ).set_color(RED)
+        r_2 = Tex(
+            r"r_2",
+            font_size=20,
+        ).set_color(GREEN)
+        product = r_2 * a_21
+        vgroup = VGroup(product, a_21, r_2).arrange(DOWN)
+        self.add(vgroup)
+
+
+class VectorByMatrix(Scene):
+    def construct(self):
+        # Write an equation and display it
+
+        input_vector = np.array([1, 3])
+        multiply_matrix = np.array([[1, 2], [2, -1]])
+
+        self.play(Write(Tex(r"v^T \times A = w^T")))
+
+        # Create a new object using a vstack, hstack, or adding text
+        equation = VGroup(
+            Tex(r"v^T \times A = w^T").scale(2),
+        )
+        # Method translate can be used to make an object appear
+        self.play(Write(equation))
+        self.wait()
+
+        # Write multiple variables
+        single = Text("Single matrix and vector", font_size=40, color=BLUE)
+
+        vec_ = VectorizedPoint(DOWN * 3 + LEFT * 3)
+        self.play(Write(single))
+        self.play(FadeIn(vec_))
+        self.wait()
+
+        vector = Matrix(input_vector)
+
+        self.play(Transfrom(input_vector, in_matrix, lag_ratio=0.5))
+        self.wait()
+
+        multiplied_vector = np.matmul(multiply_matrix, input_vector)
+
+        line = DashedLine([-0.5, 1.5, 0], [1.5, 1.5, 0])
+        arrow = Text("Multiply by A", color=RED)
+        # Grouping objects together for animation purpose
+        self.play(ShowCreation(line), Write(arrow))
+
+        w_dot = Dot(point)
+        plus1 = Tex("+", font_size=20).next_to(-0.5, 0)
+        b_dot = Dot(point)
+        self.play(FadeIn(b_dot), FadeIn(plus1), FadeIn(w_dot))
+        self.wait()
+
+        text = Tex("Vector:", font_size=20, color=YELLOW)
+        self.play(Write(text), run_time=2)
+        self.wait(2)
+
+        # Transition animations -- transforms a mobject to another mobject
+        # self.play(Transform(obj1, obj2), run_time=2)
+        # self.play(Transform(matrix, vector))
+
+        # Use FadeIn and FadeOut creat the appearance and disappearance animation
+
+        self.play(FadeOut(plus1), FadeOut(b_dot), FadeOut(text), FadeOut(w_dot))
+
+        self.wait()
+
+        # Type multiple lines of text at the same time or one by one
+        avector = Matrix(
+            multiplied_vector,
+            edge_to_node_buff=0.2,
+            add_background_rectangles_to_entries=True,
+        )
+        self.play(Write(avector))
+        self.wait()
+        self.play(FadeOut(multivector))
+
+        # Use a end screen to end the video
+        end = Tex(r"""End!""", font_size=40, color=BLUE).move_to(UP * 1.5 + LEFT * 3)
+        my_rect = Rectangle(width=16, height=3, color=WHITE)
+
+        self.play(Transform(my_rect, end))
+
+
 class RightTriangleWithSquares(Scene):
     def construct(self):
         # Define the triangle
