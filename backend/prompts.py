@@ -1,4 +1,4 @@
-STORYBOARD_PROMPT = """<s> [INST] For an audience of a {}, generate a series of frames to explain {}  Each frame should be a single animation point, such as visualizing squaring number visually or adding a vector tip to tail. It should not take longer than 15 seconds.
+STORYBOARD_PROMPT = """For an audience of a {}, generate a series of frames to explain {}  Each frame should be a single animation point, such as visualizing squaring number visually or adding a vector tip to tail. It should not take longer than 15 seconds.
 
 For example, explaining a vector addition would be:
 1. Frame showing 2 vectors from the origin explaining that these can be any arbitary vector
@@ -10,23 +10,27 @@ Do not include a frame for a quiz.
 
 Each frame should come with a short description of what it will talk about. This is meant to be the storyboard for an animated video explaining this concept. 
 
-Format the frames in a json format: 
+Format the frames in the following json format:
 
+{{ "frames": 
 [
 {{
 "title": "xxxx",
 "description": "xxxx"
 }},
 ]
+}}
+
+Ensure that the json is valid.
 
 The title should be short, limit of 5 words
 The description should be a few sentences, enough for someone to understand what to do and how to animate and explain this frame.
 
-Output only the json format of the frames. DO NOT INCUDE A PREABMBLE OR POSTAMBLE. [/INST]
+Output only the json format of the frames. DO NOT INCUDE A PREABMBLE OR POSTAMBLE.
 """
 
 
-SCENE_AGENT_PROMPT = """[INST]Given the following, generate a script and animation description in the style of 3Blue1Brown.
+SCENE_AGENT_PROMPT = """Given the following, generate a script and animation description in the style of 3Blue1Brown.
 
 {}
 

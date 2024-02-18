@@ -22,38 +22,63 @@ async def process_queue():
         queue.task_done()
 
 
+if __name__ == "__main__":
+    loop = asyncio.get_event_loop()
+    loop.create_task(process_queue())
+
+
 async def generate_scene(item):
+    print("Generating scene: ", item["id"], item["title"])
     # item has, key, title and description
 
     # Generate the scene information
     scene_query = prompts.SCENE_AGENT_PROMPT.format(item["description"])
-    scene_response = await query_llm(scene_query, False)
 
+    print(scene_query)
+
+    scene_response = await async_query_llm(scene_query, False)
+
+    print(scene_response)
     scene_data = json.loads(scene_response["text"][0])
 
     scenes[item[item["id"]]]["data"] = scene_data
+
+    # Generate the animation code
 
     animation_query = prompts.ANIMATION_PROMPT.format(
         scene_data["narration"], scene_data["animation-description"]
     )
 
-    animation_response = await query_llm(animation_query, False)
+    print(animation_query)
+
+    animation_response = await async_query_llm(animation_query, False)
     # todo: deal with fine tuning = true
+
+    print(animation_response)
+
     animation_code = animation_response["text"][0]
     scenes[item[item["id"]]]["code"] = animation_code
 
     # Generate the video
     generate_video(item["id"])
 
+    # Write the data to a file
+    with open("scenes.json", "w") as f:
+        json.dump(scenes, f, indent=4)
+
 
 async def generate_video(item_id):
+    print("Generating video: ", item_id)
     # Generate the video from the code
 
     with open(f"scene_{item_id}.py", "w") as f:
         f.write(scenes[item_id]["code"])
 
     # Run the manim command
-    os.system(f"manim scene_{item_id}.py -o -lq scene_{item_id}.mp4")
+    try:
+        os.system(f"manim scene_{item_id}.py -o -lq scene_{item_id}.mp4")
+    except Exception as e:
+        print("Error: ", e)
     # todo: deal with what happens when it errors out
 
     # Do something with audio generation
@@ -71,7 +96,8 @@ config = toml.load("config.toml")
 
 
 async def async_query_llm(prompt: str, is_code: bool = False):
-    model = "mixtal" if is_code else "codellama"
+    # model = "c" if is_code else "codellama"
+    model = "mixtral"
 
     payload_body = {
         "input_variables": {"prompt": prompt},
@@ -108,7 +134,8 @@ async def async_query_llm(prompt: str, is_code: bool = False):
 
 
 def query_llm(prompt: str, is_code: bool = False):
-    model = "mixtal" if is_code else "codellama"
+    # model = "mixtal" if is_code else "codellama"
+    model = "mixtral"
 
     payload_body = {
         "input_variables": {"prompt": prompt},
@@ -161,6 +188,8 @@ async def init(audience: str = "high school student", concept: str = "vector add
 
     response = query_llm(formatted_prompt, False)
 
+    print(response)
+
     query_save = {
         "prompt": formatted_prompt,
         "response": response,
@@ -168,7 +197,8 @@ async def init(audience: str = "high school student", concept: str = "vector add
 
     storyboard_query_save.append(query_save)
 
-    storyboards = json.loads(response["text"][0])
+    # storyboards = json.loads(response["text"][0])["frames"]
+    storyboards = json.loads(response["text"][0])["frames"]
 
     for storyboard in storyboards:
         scenes[str(uuid.uuid4())] = storyboard
@@ -191,7 +221,7 @@ async def scene(scene_id: str):
     return scenes[scene_id]
 
 
-@app.get(f"/api/video/{scene_id}")
+@app.get("/api/video/{scene_id}")
 async def video(scene_id: str):
     if scene_id not in scenes:
         return {"error": "Scene not found"}
