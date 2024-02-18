@@ -1,3 +1,5 @@
 .venv/*
 
 **/WIP_*.**
+
+backend/media/*
