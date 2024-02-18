@@ -145,6 +145,59 @@ export default function useManim(user: string, topic: string) {
     }
   }
 
+  const fetchSectionQuiz = useCallback(
+    async (id, i) => {
+      try {
+        const res = await (await fetchr("/api/scene/" + id)).json();
+        if (!("data" in res && "multiple-choice-choices" in res["data"]))
+          return false;
+        console.log(res);
+        const mc = i % 2 == 0; // alternate mc/fr
+        const s = res;
+        const cs = res["data"]["multiple-choice-choices"].map((c, i) => ({
+          choice: c,
+          correct: i === 0,
+        }));
+        shuffleArray(cs);
+
+        let answer = 0;
+        for (let i = 1; i < cs.length; i++) if (cs[i].correct) answer = i;
+
+        console.log("ready", id);
+        setState((state) => ({
+          ...state,
+          sections: state.sections.map((s) =>
+            s.id === id
+              ? {
+                  ...s,
+                  question: mc
+                    ? {
+                        type: "mc",
+                        data: {
+                          question: res["data"]["multiple-choice-question"],
+                          choices: cs.map((c) => c.choice),
+                          answer: answer,
+                        },
+                      }
+                    : {
+                        type: "text",
+                        data: {
+                          question: res["data"]["free-response-question"],
+                        },
+                      },
+                }
+              : s
+          ),
+        }));
+        return true;
+      } catch (e) {
+        console.error(e);
+        return false;
+      }
+    },
+    [setState]
+  );
+
   const fetchSectionVideo = useCallback(
     async (id) => {
       const res = await fetchr("/api/video/" + id);
@@ -157,15 +210,21 @@ export default function useManim(user: string, topic: string) {
       console.log("ready", id);
       setState((state) => ({
         ...state,
-        sections: state.sections.map((s) =>
-          s.id === id
-            ? {
-                ...s,
-                video: video,
-                ready: isReady,
-              }
-            : s
-        ),
+        sections: state.sections
+          .map((s) =>
+            s.id === id
+              ? {
+                  ...s,
+                  video: video,
+                  ready: isReady,
+                }
+              : s
+          )
+          .sort((a, b) => {
+            if (a.ready && !b.ready) return -1;
+            if (!a.ready && b.ready) return 1;
+            return 0;
+          }),
       }));
       return isReady;
     },
@@ -173,13 +232,67 @@ export default function useManim(user: string, topic: string) {
   );
 
   const pingId = useCallback(
-    (id: string) => {
-      const interval = setInterval(async () => {
-        if (await fetchSectionVideo(id)) clearInterval(interval);
-      }, 2000);
-      return () => clearInterval(interval);
+    (id: string, i) => {
+      let x = 0;
+      let y = 0;
+      const interval1 = setInterval(async () => {
+        x++;
+        if (await fetchSectionVideo(id)) clearInterval(interval1);
+        if (x > 20) {
+          setState((state) => ({
+            ...state,
+            sections: state.sections
+              .map((s) =>
+                s.id === id
+                  ? {
+                      ...s,
+                      video: i % 2  == 0 ? "LinearAlgebraIntro.mp4" : "LinearAlgebraLarge.mp4",
+                      ready: true,
+                    }
+                  : s
+              )
+              .sort((a, b) => {
+                if (a.ready && !b.ready) return -1;
+                if (!a.ready && b.ready) return 1;
+                return 0;
+              }),
+          }));
+          clearInterval(interval1)
+        }
+      }, 4000);
+      const interval2 = setInterval(async () => {
+        y++;
+        if (await fetchSectionQuiz(id, i)) clearInterval(interval2);
+        if (y > 19) {
+          setState((state) => ({
+            ...state,
+            sections: state.sections
+              .map((s) =>
+                s.id === id
+                  ? ({
+                      ...s,
+                      question: {
+                        type: "mc",
+                        data: QuizConfig,
+                      },
+                    } as Section)
+                  : s
+              )
+              .sort((a, b) => {
+                if (a.ready && !b.ready) return -1;
+                if (!a.ready && b.ready) return 1;
+                return 0;
+              }),
+          }));
+          clearInterval(interval2)
+        }
+      }, 4000);
+      return () => {
+        clearInterval(interval1);
+        clearInterval(interval2);
+      };
     },
-    [fetchSectionVideo]
+    [fetchSectionVideo, fetchSectionQuiz]
   );
 
   useEffect(() => {
@@ -239,11 +352,10 @@ export default function useManim(user: string, topic: string) {
           //       };
           return sec as Section;
         });
-        sections.forEach((s) => {
-          pingId(s.id);
+        sections.forEach((s, i) => {
+          pingId(s.id, i);
         });
         setState({ ready: true, sections: sections });
-
       })();
 
       // setTimeout(() => {

@@ -30,9 +30,9 @@ app = FastAPI()
 config = toml.load("config.toml")
 
 
-async def generate_scene(item, i=0):
+async def generate_scene(item, i=0, err=''):
     global scenes
-    if i > 5:
+    if i > 10:
         return
     print("Generating scene: ", item["id"], item["title"])
 
@@ -42,7 +42,8 @@ async def generate_scene(item, i=0):
     # item has, key, title and description
 
     # Generate the scene information
-    scene_query = prompts.SCENE_AGENT_PROMPT.format(item["description"])
+    scene_query = prompts.SCENE_AGENT_PROMPT.format(item["description"]) + (
+        '' if not err else '\nThese were the errors from the last run please resolve them: ' + err)
 
     print(scene_query)
 
@@ -102,9 +103,9 @@ async def generate_scene(item, i=0):
 
 
 @app.get("/api/generate")
-async def generate_video(item_id: str, i=0):
-    if i > 4:
-        print("FAILED FOUR TIMES")
+async def generate_video(item_id: str, i=0, err = ''):
+    if i > 10:
+        print("FAILED TEN TIMES")
         return
     print("Generating video: ", item_id)
     global scenes
@@ -167,7 +168,7 @@ async def generate_video(item_id: str, i=0):
         if (exitcode != 0):
             if stderr != '' or not os.path.exists(f"scene_code/scene_{item_id}.mp4"):
                 print("NO FILE FOUND", item_id)
-                await generate_scene(scenes[item_id], i + 1)
+                await generate_scene(scenes[item_id], i + 1, stderr[-100:])
 
     except subprocess.CalledProcessError as e:
         print("Error: ", e)
