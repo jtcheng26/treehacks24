@@ -20,6 +20,8 @@ import subprocess
 
 import time
 
+from starlette.concurrency import run_in_threadpool
+
 # Event loop for querying each scene
 
 app = FastAPI()
@@ -43,7 +45,7 @@ async def generate_scene(item, i=0):
 
     print(scene_query)
 
-    scene_response = query_gpt(scene_query, False, True)
+    scene_response = await run_in_threadpool(query_gpt, scene_query, False, True)
 
     print(scene_response)
 
@@ -62,15 +64,15 @@ async def generate_scene(item, i=0):
             work = True
 
         except json.JSONDecodeError as e:
-            # scene_query += (
-            #     "\n\n"
-            #     + scene_response["text"][0]
-            #     + "\n\nTHIS IS NOT VALID JSON. PLEASE FIX IT. RETURN ONLY A VALID JSON FORMAT."
-            # )
+            scene_query += (
+                "\n\n"
+                + scene_response["text"][0]
+                + "\n\nTHIS IS NOT VALID JSON. PLEASE FIX IT. RETURN ONLY A VALID JSON FORMAT."
+            )
 
             print("Invalid JSON")
             print(scene_query)
-            # scene_response = await query_gpt(scene_query, False)
+            scene_response = await run_in_threadpool(query_gpt, scene_query, False)
 
     scenes[item["id"]]["data"] = scene_data
 
@@ -82,7 +84,7 @@ async def generate_scene(item, i=0):
 
     print(animation_query)
 
-    animation_response = query_gpt(animation_query, False, True)
+    animation_response = await run_in_threadpool(query_gpt, animation_query, False, True)
     # todo: deal with fine tuning = true
 
     print(animation_response)
@@ -108,9 +110,25 @@ async def generate_video(item_id: str, i=0):
     # scenes = json.load(open("scenes.json"))
     # Generate the video from the code
 
+    def extract_code_blocks(input_string, pattern):
+        matches = re.findall(pattern, input_string, re.DOTALL)
+
+        return matches
+
     with open(f"scene_code/scene_{item_id}.py", "w") as f:
-        f.write('from manim import *\nconfig.background_color = "#0F172A"\n' +
-                textwrap.dedent(scenes[item_id]["code"]).rstrip()[10:-3])
+        uh = textwrap.dedent(scenes[item_id]["code"]).rstrip()
+        res = extract_code_blocks(uh, r'```python(.*?)```')
+        res2 = extract_code_blocks(uh, r'```(.*?)```')
+        if len(res) and len(res[0]):
+            res = textwrap.dedent(res[0]).rstrip()
+            f.write(
+                'from manim import *\nconfig.background_color = "#0F172A"\n' + res)
+        elif len(res2) and len(res2[0]):
+            res2 = textwrap.dedent(res2[0]).rstrip()
+            f.write(
+                'from manim import *\nconfig.background_color = "#0F172A"\n' + res2)
+        else:
+            f.write('from manim import *\nconfig.background_color = "#0F172A"\n' + uh)
 
     # Run the manim command
     try:
@@ -128,20 +146,31 @@ async def generate_video(item_id: str, i=0):
             pathlib.Path(__file__).parent /
             "scene_code" / f"scene_{item_id}",
         ]
-        result = subprocess.run(command, capture_output=True, text=True)
 
-        print("what")
+        async def run_command(command):
 
-        print(result.stdout)
+            process = await asyncio.create_subprocess_exec(
+                *command,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE
+            )
+
+            stdout, stderr = await process.communicate()
+
+            return process.returncode, stdout.decode(), stderr.decode()
+        exitcode, stdout, stderr = await run_command(command)
+        print("EXITCODE", exitcode)
+        print(stdout)
+        print("STDERRRR", stderr)
+        if stderr != '' or not os.path.exists(f"scene_code/scene_{item_id}.mp4"):
+            print("NO FILE FOUND", item_id)
+            await generate_scene(scenes[item_id], i + 1)
+
     except subprocess.CalledProcessError as e:
         print("Error: ", e)
         print(e.stderr)
         print("llll")
-    finally:
-        if not os.path.exists(f"scene_code/scene_{item_id}.mp4"):
-            await generate_scene(scenes[item_id], i + 1)
 
-            
     # todo: deal with what happens when it errors out
 
     print("done")
@@ -308,7 +337,7 @@ async def init(audience: str = "high school student", concept: str = "vector add
 
     print(formatted_prompt)
 
-    response = json.loads(query_gpt(formatted_prompt, False))
+    response = json.loads(await run_in_threadpool(query_gpt, formatted_prompt, False))
 
     print(response)
 
@@ -335,14 +364,14 @@ async def init(audience: str = "high school student", concept: str = "vector add
             storyboards = json.loads(text)["frames"]
             valid = True
         except json.JSONDecodeError as e:
-            # formatted_prompt += (
-            #     "\n\n"
-            #     + response["text"][0]
-            #     + "\n\nTHIS IS NOT VALID JSON. PLEASE FIX IT. RETURN ONLY A VALID JSON FORMAT."
-            # )
+            formatted_prompt += (
+                "\n\n"
+                + response["text"][0]
+                + "\n\nTHIS IS NOT VALID JSON. PLEASE FIX IT. RETURN ONLY A VALID JSON FORMAT."
+            )
             print("Invalid JSON")
             print(formatted_prompt)
-            # response = query_llm(formatted_prompt, False)
+            response = run_in_threadpool(query_gpt, formatted_prompt, False)
 
     storyboards = response["frames"]
 
@@ -398,7 +427,7 @@ async def check_answer(request: Request):
 
     # response = query_llm(formatted_prompt, False)
 
-    response = query_gpt(formatted_prompt)
+    response = await run_in_threadpool(query_gpt, formatted_prompt)
     # response = "YES"
     # print(response)
 
