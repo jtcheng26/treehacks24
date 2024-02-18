@@ -81,6 +81,7 @@ export default function Content({ user, topic, reset }) {
     setPlaying(true);
   }
   const initialLoading = loading || !data.length || !data[0].ready;
+  const currLoading = data.length && !data[currentSection].ready;
   return (
     <div className="w-full h-full flex flex-col">
       <div
@@ -127,7 +128,7 @@ export default function Content({ user, topic, reset }) {
         <div className="w-full flex flex-row items-center space-x-4 justify-center pb-4">
           <ReplayButton onClick={handleReplay} visible={showReplay} />
           <QuestionInput
-            visible={!initialLoading}
+            visible={!initialLoading && !currLoading}
             onSubmit={handleQuestion}
             onFocus={handleFocus}
             onUnfocus={handleUnfocus}

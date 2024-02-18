@@ -1,116 +1,154 @@
 {
-    "99e5afbf-a517-4ba0-951a-51e507b86901": {
-        "title": "Vector Introduction",
-        "description": "Introduce a vector with an arrow and label it as 'v' with components (x, y).",
-        "id": "99e5afbf-a517-4ba0-951a-51e507b86901",
+    "0fbe65b2-1918-4e95-9786-da7a3dcff2a9": {
+        "title": "Introduction to Vectors",
+        "description": "Show two vectors originating from the origin on a 2D plane. Label them as 'Vector 1' and 'Vector 2' respectively. Explain that vectors can be any arbitrary length and direction.",
+        "id": "0fbe65b2-1918-4e95-9786-da7a3dcff2a9",
         "data": {
-            "narration": "Today, let's talk about vectors. A vector is a mathematical object that has both a magnitude and a direction. We can represent a vector using an arrow, just like this one here.",
-            "animation-description": "A horizontal number line is displayed at the center of the screen, ranging from -10 to 10 with ticks every 0.2. A red arrow is labeled 'v' with components (x, y) is drawn, pointing from 0 to +5. The arrow then shrinks until it points to +2.",
-            "free-response-question": "Describe what a vector is and its two main properties.",
-            "free-response-answer": "A vector is a mathematical object that has both a magnitude and a direction. It can be represented by an arrow, where the length of the arrow represents the magnitude and the direction in which the arrow is pointing represents the direction.",
+            "narration": "Consider two vectors on a 2D plane. Let's label these as 'Vector 1' and 'Vector 2'. Vectors, by nature, can possess any length and any direction.",
+            "animation-description": "Show a 2D plane centered on the screen. Two arrows, each starting from the origin, will appear. The first arrow points to positive x-axis and the second one to positive y-axis. We label them as 'Vector 1' and 'Vector 2' respectively. While the explanation about vectors' arbitrary length and direction is being given, illustrate it by animating both vectors changing in length and direction.",
+            "free-response-question": "In your own words, can you explain what is meant by a 'vector' in the context of two-dimensional space?",
+            "free-response-answer": "A vector is an entity that has both magnitude and direction. In the context of a two-dimensional space, a vector can be represented as an arrow that starts from an origin and extends in any direction, with length representing its magnitude or 'strength'.",
+            "multiple-choice-question": "Which of the following statements about vectors is FALSE?",
+            "multiple-choice-choices": [
+                "Vectors can only point towards the positive regions of a plane.",
+                "Vectors have both magnitude and direction.",
+                "The length of a vector represents its magnitude.",
+                "Vectors can point in any direction."
+            ]
+        },
+        "code": "```python\nfrom manim import *\n\nclass VectorsScene(Scene):\n    def construct(self):\n        # Create a 2D plane\n        plane = NumberPlane()\n\n        # Create two vector arrows\n        vector1 = Vector([1, 0, 0], color=BLUE)\n        vector2 = Vector([0, 1, 0], color=GREEN)\n\n        # Label vectors\n        vector1_label = MathTex(\"Vector 1\").next_to(vector1, UP)\n        vector2_label = MathTex(\"Vector 2\").next_to(vector2, RIGHT)\n\n        self.play(Create(plane))\n        self.play(FadeIn(vector1), Write(vector1_label))\n        self.wait(1)\n        self.play(FadeIn(vector2), Write(vector2_label))\n        self.wait(1)\n\n        # Animate vectors' arbitrary length and direction using Transform\n        self.play(\n            Transform(vector1, Vector([2, 2, 0]), run_time=2),\n            Transform(vector2, Vector([-1, -2, 0]), run_time=2)\n        )\n        self.wait(1)\n```\nThis chunk of code would generate the manim animation as per your description. `NumberPlane()` is used to create the 2D plane and `Vector()` to generate the vectors. The `Transform()` function is used to animate the vectors changing in length and direction."
+    },
+    "cb42740b-4879-4e31-984b-d49e9a9410f8": {
+        "title": "Visualizing Vector Addition",
+        "description": "Animate the 'tip-to-tail' method of vector addition by moving 'Vector 2' to the tip of 'Vector 1'. Draw a new vector from the origin to the tip of the relocated 'Vector 2' representing the resulting vector.",
+        "id": "cb42740b-4879-4e31-984b-d49e9a9410f8",
+        "data": {
+            "narration": "Now, watch as Vector 2 fluidly moves to the end of Vector 1, their relative position intact. Notice how we are then able to draw a new vector from the origin to the endpoint of this relocated Vector 2, thus illustrating the sum of these two vectors using the 'tip-to-tail' method.",
+            "animation-description": "The animation starts with two vectors, Vector 1 and Vector 2, originating from the origin. Vector 1 is positioned horizontally to the right, and Vector 2 is displayed vertically up. Vector 2 is animated to move such that its tail aligns with the tip of Vector 1, preserving the direction of Vector 2. A new vector is then drawn from the origin to the tip of the relocated Vector 2. This resulting Vector, which represents the sum of Vector 1 and Vector 2, is colored distinctly, and the entire scene is steadily zoomed in.",
+            "free-response-question": "Why is the 'tip-to-tail' method a valid way to add vectors?",
+            "free-response-answer": "The 'tip-to-tail' method is valid because vectors are not bound to a specific place in space. They can be moved around, provided their direction and length remain unchanged. When we align the tail of one vector to the tip of another, we are essentially traveling along the path represented by the first vector, then continuing along the path of the second vector, which is the equivalent operation of adding the two vectors.",
+            "multiple-choice-question": "What does the resulting vector from the 'tip-to-tail' method represent?",
+            "multiple-choice-choices": [
+                "The sum of the two vectors",
+                "The difference between the two vectors",
+                "The product of the two vectors",
+                "The quotient of the two vectors"
+            ]
+        },
+        "code": "Here's the manim code for the described scene:\n\n```python\nfrom manim import *\n\nclass VectorAddition(Scene):\n    def construct(self):\n        vector1 = Vector([2, 0, 0]).set_color(BLUE)\n        vector2 = Vector([0, 2, 0]).set_color(RED)\n        vector_sum = Vector([2, 2, 0]).set_color(YELLOW)\n\n        self.play(Create(vector1))\n        self.play(Create(vector2))\n\n        self.wait(1)\n\n        self.play(ApplyMethod(vector2.shift, vector1.get_end()))\n\n        self.play(Create(vector_sum))\n\n        self.wait(1)\n\n        self.play(ApplyMethod(self.camera.frame.animate.scale, 0.5))\n\n        self.wait(2)\n```\n\nThis script creates an animation in which two vectors, represented in blue and red, are displayed. The red vector (Vector 2) then moves to the end of the blue one (Vector 1) while maintaining its direction. Afterwards, a new vector (sum of Vector 1 and Vector 2), represented in yellow, is drawn from the origin to the end of moved Vector 2. The animation concludes by zooming into the scene."
+    },
+    "167f0896-c924-4a6c-9f6f-e43b1ae3c6b3": {
+        "title": "Numerical Vector Addition",
+        "description": "Display the numerical components of both the vectors and add them separately. Emphasize that vector addition involves adding each corresponding component of the vectors individually.",
+        "id": "167f0896-c924-4a6c-9f6f-e43b1ae3c6b3",
+        "data": {
+            "narration": "Let's consider vectors A and B. The components of vector A are A1, A2, A3 and for vector B, they are B1, B2, B3. Now, when we add these vectors together, we aren't adding them in totality, instead, we add their respective components separately. So, A1 goes with B1, A2 with B2, and A3 with B3.",
+            "animation-description": "Centre of the screen displays two labelled 3D vectors, 'A' and 'B'. These vectors decompose into components. Vectors 'A1', 'A2', 'A3' emerge from vector 'A', and vectors 'B1', 'B2', 'B3' emerge from vector 'B'. Each corresponding pair (A1 and B1, A2 and B2, A3 and B3) highlights successively, indicating their addition. Resultant vectors from these additions show alongside.",
+            "free-response-question": "What does it mean to add vectors component wise, and why is this method used?",
+            "free-response-answer": "Adding vectors component-wise means adding the respective components of the vectors individually. This is done because each component represents a different aspect (like direction) of the vector, and these aspects should be considered separately.",
+            "multiple-choice-question": "What happens when we add vectors A and B component-wise?",
+            "multiple-choice-choices": [
+                "We get a new vector, whose components are the sums of the corresponding components of A and B",
+                "We get a single number, which is the sum of the magnitudes of A and B",
+                "We get a new vector, which is the sum of the magnitudes of A and B",
+                "None of the above"
+            ]
+        },
+        "code": "Here is an example of how you might code this in manim:\n\n```python\nfrom manim import *\n\nclass VectorScene(ThreeDScene):\n    def construct(self):\n\n        # Create vector A and vector B\n        vector_A = Vector([2, 3, 2], color=RED)\n        vector_B = Vector([1, -2, 1], color=BLUE)\n\n        # Create labels for vectors\n        vector_A_label = MathTex(\"A\").next_to(vector_A, UP).set_color(RED)\n        vector_B_label = MathTex(\"B\").next_to(vector_B, DOWN).set_color(BLUE)\n\n        # Create components for vector A\n        A1 = Vector([2, 0, 0], color=YELLOW)\n        A2 = Vector([0, 3, 0], color=YELLOW)\n        A3 = Vector([0, 0, 2], color=YELLOW)\n\n        # Create components for vector B\n        B1 = Vector([1, 0, 0], color=PURPLE)\n        B2 = Vector([0, -2, 0], color=PURPLE)\n        B3 = Vector([0, 0, 1], color=PURPLE)\n\n        self.set_camera_orientation(phi=75 * DEGREES, theta=30 * DEGREES, distance=10)\n        \n        # Add vectors and labels to the scene\n        self.play(FadeIn(vector_A), Write(vector_A_label))\n        self.wait(1)\n        self.play(Transform(vector_A.copy(), A1),Transform(vector_A.copy(), A2),Transform(vector_A.copy(), A3))\n        self.wait(1)\n\n        self.play(FadeIn(vector_B), Write(vector_B_label))\n        self.wait(1)\n        self.play(Transform(vector_B.copy(), B1),Transform(vector_B.copy(), B2),Transform(vector_B.copy(), B3))\n        self.wait(1)\n\n        # Pair-wise addition of components\n        components = [(A1, B1), (A2, B2), (A3, B3)]\n        for a, b in components:\n            self.play(a.set_color, GREEN, b.set_color, GREEN)\n            self.play(ReplacementTransform(a.copy()+b.copy(), a), ReplacementTransform(b.copy()+a.copy(), b))\n            self.wait(1)\n\n        self.wait(1)\n        self.play(vector_A.set_color, WHITE,vector_B.set_color, WHITE) # change back to default color\n        self.wait(1)\n```\nThis code creates a scene where 3D vectors \"A\" and \"B\" appear and their components break out into individual directional vectors. These components are then sequentially added pairwise and showcased.  Please note that starting from manim version 0.8.0, 'manim' has been renamed to 'manimpango'. Make sure you have the correct version of manim installed."
+    },
+    "5e69fbca-ba98-4516-91b3-de27ab371be8": {
+        "title": "Practical Example",
+        "description": "Use the concept of force to explain vector addition. Display two forces acting on an object and show how these forces combine by using vector addition resulting in one force.",
+        "id": "5e69fbca-ba98-4516-91b3-de27ab371be8",
+        "data": {
+            "narration": "Consider an object on which two forces are acting. Force one is pushing the object to the right, while force two is pushing it upwards. Now, if we add these two forces together, we get a single force, called the resultant force, which represents the combined effect of these two forces on the object. This is how vector addition works in the concept of forces.",
+            "animation-description": "The scene starts with an object centered on the screen. Force one, depicted by a red arrow, appears pushing the object to the right. Simultaneously, force two, shown by a blue arrow, appears pushing the object upwards. Lines trace the path of both forces creating a right-angled triangle. Then, a yellow arrow representing the resultant force is drawn from the object to the apex of the triangle formed by force one and force two.",
+            "free-response-question": "What does the resultant force represent in the context of vector addition?",
+            "free-response-answer": "The resultant force represents the combined effect of the two forces added together.",
+            "multiple-choice-question": "What is vector addition used for in the concept of forces?",
+            "multiple-choice-choices": [
+                "It is used to combine multiple forces acting on an object into one resultant force.",
+                "It is used to determine the angle between two forces.",
+                "It is used to find the magnitude of a single force.",
+                "It is used to find the direction in which the object moves."
+            ]
+        },
+        "code": "```python\nfrom manim import *\nimport numpy as np\n\nclass ForceVectorScene(Scene):\n    def construct(self):\n        # create the object\n        obj = Dot().move_to(ORIGIN)\n        self.add(obj)\n\n        # create force one (red arrow to the right)\n        force_one = Arrow(obj.get_center(), RIGHT*2, buff=0, color=RED)\n        self.play(Create(force_one))\n        \n        # create force two (blue arrow upwards)\n        force_two = Arrow(force_one.get_end(), UP*2, buff=0, color=BLUE)\n        self.play(Create(force_two))\n\n        # Creating paths of force one and force two\n        path_of_force_one = DashedVMobject(Line(obj.get_center(), force_one.get_end(), color=LIGHT_GREY))\n        path_of_force_two = DashedVMobject(Line(force_one.get_end(), force_two.get_end(), color=LIGHT_GREY))\n        \n        self.play(Create(path_of_force_one), Create(path_of_force_two))\n        \n\n        # create resultant force (yellow arrow)\n        resultant = Arrow(obj.get_center(), force_two.get_end(), buff=0, color=YELLOW)\n        self.play(Create(resultant))\n        self.wait(2)\n ```\nThis script will create the object at the center of the screen. `Force_one` is represented with a red arrow pushing to the right, played together with `force_one`. Then, `force_two`, pushing the object upwards with a blue arrow is created. The paths for both forces are created and played together as `path_of_force_one` and `path_of_force_two`, creating a right-angled triangle. Finally, the resultant force, the combination of the two forces, is drawn as a yellow arrow from the center to the apex of the right-angled triangle.\n\nPlease remember to run manim library to execute this scene. This code should be saved in a python file and run from the command line. Provide the filename and the scene name (ForceVectorScene) as command line arguments when running the script."
+    },
+    "3b3a00f6-5e69-4933-b23d-4ac814ca4cc4": {
+        "title": "Introducing Vectors",
+        "description": "An illustrative introduction to the concept of vectors, showing two random vectors starting from the origin. Each vector is labeled clearly to differentiate. This should give the viewer an understanding of what a vector represents.",
+        "id": "3b3a00f6-5e69-4933-b23d-4ac814ca4cc4",
+        "data": {
+            "narration": "Imagine a flat plane, and on this plane we place two arrows starting from the same point, the origin. These arrows, or 'vectors', have a certain direction and length, which serve to clearly differentiate one from the other. This is the essence of what a vector represents.",
+            "animation-description": "A black 2D Cartesian grid is centered on the screen with range -10 to 10 on both axes. Two vectors, one red and one blue, appear to sprout out from the origin. The red vector points to the right and up with a shorter length, whereas the blue vector points left and up with a longer length. As the narration proceeds, labels pop up to highlight the 'origin', 'direction' and 'length' to be visually associated with the vectors.",
+            "free-response-question": "Give an example of a real-life application of vectors.",
+            "free-response-answer": "Vectors can be used in physics to represent quantities that have both magnitude and direction such as force, velocity, and displacement.",
             "multiple-choice-question": "What does a vector represent?",
             "multiple-choice-choices": [
-                "A magnitude with no direction",
-                "A direction with no magnitude",
-                "Both a magnitude and a direction",
-                "Neither a magnitude nor a direction"
+                "A quantity with both direction and magnitude starting from a certain position.",
+                "A measurement of distance.",
+                "A path from one point to another.",
+                "A fixed location in space."
             ]
         },
-        "code": " from manim import *\n\nclass VectorIntro(Scene):\n    def construct(self):\n        # Set up number line\n        number_line = NumberLine(\n            x_min=-10, x_max=10,\n            unit_size=2,\n            number_of_marks=5,\n            mark_to_number_mappings={\n                2: \"$2$\",\n                4: \"$4$\",\n                6: \"$6$\",\n                8: \"$8$\",\n            }\n        )\n\n        # Set up vector\n        vector_label = Tex(\"v\", font_size=25).shift(0.5 * RIGHT)\n        vector_end = 5 * RIGHT\n        vector_start = ORIGIN\n        vector_config = Arrow(\n            vector_start, vector_end,\n            buff=0.2,\n            stroke_width=3,\n            color=YELLOW\n        ).add_label(vector_label)\n\n        # Set up shrinking vector\n        shrunk_vector_end = 2 * RIGHT\n        shrunk_vector_config = vector_config.copy().shift(\n            shrunk_vector_end - vector_end\n        )\n\n        # Display all objects\n        self.play(\n            Create(number_line),\n            Create(vector_config),\n        )\n        self.wait(1)\n        self.play(\n            vector_config.animate(\n                target=(vector_start, shrunk_vector_end)\n            ),\n        )\n        self.wait(1)\n\n        self.play(\n            Uncreate(number_line),\n            Uncreate(vector_config),\n        )"
+        "code": "```python\nfrom manim import *\n\nclass VectorScene(Scene):\n    def construct(self):\n        # Create 2D Cartesian grid\n        grid = NumberPlane(x_range=[-10,10,1], y_range=[-10,10,1])\n        self.add(grid)\n\n        # Create two vectors\n        red_vector = Vector([2,3])\n        blue_vector = Vector([-5,4])\n\n        # Add color to vectors\n        red_vector.set_color(RED)\n        blue_vector.set_color(BLUE)\n\n        # Create labels\n        origin_label = Text('Origin', font_size=24).next_to(ORIGIN, DOWN)\n        red_dir_label = Text('Direction', font_size=24).next_to(red_vector.get_end(), RIGHT)\n        blue_len_label = Text('Length', font_size=24).next_to(blue_vector.get_end(), UP)\n\n        # Create vector group with labels\n        red_vector_group = VGroup(red_vector, red_dir_label)\n        blue_vector_group = VGroup(blue_vector, blue_len_label)\n\n        self.play(FadeIn(origin_label), GrowArrow(red_vector), GrowArrow(blue_vector))\n        self.play(Write(red_dir_label), Write(blue_len_label))\n\n        self.wait(5)\n\n# Run the scene\nif __name__ == \"__main__\":\n    module_name = os.getenv(\"FILE_NAME\")\n    command_A = \"-p -ql --progress_bar=none\"\n    os.system(f\"manim {command_A} {module_name} VectorScene\")\n```"
     },
-    "71526399-84a9-4472-b993-3c61fe4b21a5": {
-        "title": "Matrix Introduction",
-        "description": "Introduce a 2x2 matrix with each element labeled. Mention that this matrix will be used to multiply the vector.",
-        "id": "71526399-84a9-4472-b993-3c61fe4b21a5",
+    "69f641b0-abcf-433e-a803-5e5757ef00c8": {
+        "title": "Vector Movement",
+        "description": "This frame deals with the movement of the second vector to the end tip of the first vector. A visual demonstration of this process should help the viewer understand 'tip to tail' method used in vector addition. A resulting vector is drawn from the origin to the tip of the second vector after moving.",
+        "id": "69f641b0-abcf-433e-a803-5e5757ef00c8",
         "data": {
-            "narration": "Let's introduce a 2x2 matrix, where each element is labeled. We'll use this matrix to multiply a vector.",
-            "animation-description": "Show a 2x2 matrix on the screen with each element labeled. The matrix should be centered horizontally and vertically on the screen. The size of the matrix should be legible, with a thin black border. The individual elements should be slightly spaced apart from each other.",
-            "free-response-question": "Describe the process of matrix multiplication with a vector.",
-            "free-response-answer": "Matrix multiplication with a vector involves multiplying each row of the matrix by the vector, resulting in a new vector. This is done by multiplying the corresponding elements in the row and vector, then summing the results to get the resulting vector element.",
-            "multiple-choice-question": "What is the result of multiplying a 2x2 matrix by a 2D vector?",
+            "narration": "Adding two vectors involves putting the tail of the second vector at the tip of the first vector. The resulting vector goes from the origin to the tip of this moved vector.",
+            "animation-description": "The first vector, originating from the origin, is static indicating its initial position. The second vector slides from its initial position and aligns itself to the end tip of the first vector, keeping its direction intact. It's known as the 'tip to tail' method. Then, a new vector (resulting vector) appears originating from the origin and extending to the tip of this moved second vector. It is demonstrated in a clear and paced manner with appropriate vector arrows and lines.",
+            "free-response-question": "Can you explain how to add two vectors using the 'tip to tail' method?",
+            "free-response-answer": "To add two vectors using the 'tip to tail' method, place the tail of the second vector at the tip of the first vector. Then, draw a new vector (the resulting vector) from the origin to the tip of the second vector. The resulting vector represents the sum of the two vectors.",
+            "multiple-choice-question": "What does the resulting vector represent in the 'tip to tail' method of vector addition?",
             "multiple-choice-choices": [
-                "A new 2D vector with the same number of elements as the original vector.",
-                "A new 2D vector with twice the number of elements as the original vector.",
-                "A new 2x2 matrix.",
-                "A new 3D vector."
+                "It represents the sum of the two vectors.",
+                "It represents the difference of the two vectors.",
+                "It represents the product of the two vectors.",
+                "It represents the quotient of the two vectors."
             ]
         },
-        "code": " from manim import *\n\nclass MatrixMultiplicationScene(Scene):\n    def construct(self):\n        matrix = Matrix([\n            [1, 2],\n            [3, 4]\n        ]).set_edge_and_bar_color(edge_color=BLACK, bar_color=WHITE)\n\n        matrix_labels = VGroup(*[\n            Tex(f\"a_{i},{j}\".format(i=i, j=j))\n            for i in range(2)\n            for j in range(2)\n        ])\n\n        for i in range(2):\n            for j in range(2):\n                matrix_labels[i*2+j].move_to(matrix.get_corner(UL) + (i*UNIT_ vectors.RIGHT + j*UNIT_vectors.UP))\n\n        self.play(\n            Create(matrix),\n            Write(matrix_labels)\n        )\n        self.wait(1)\n        self.play(\n            *[FadeOut(matrix_labels[i]) for i in range(4)]\n        )\n        self.wait(1)"
+        "code": "```python\nfrom manim import *\n\nclass VectorAddition(Scene):\n    def construct(self):\n        vec1 = Vector(direction=RIGHT*3+UP*2, color=BLUE)\n        vec2 = Vector(direction=UP*2+RIGHT, color=YELLOW)\n        resulting_vec = Vector(direction=vec1.get_end()+vec2.get_end(), color=RED)\n\n        self.play(Create(vec1))\n        self.play(Create(vec2))\n\n        self.wait(1)\n\n        self.play(\n            vec2.animate.shift(vec1.get_end() - vec2.get_start())\n        )\n\n        self.wait(1)\n\n        self.play(Create(resulting_vec))\n\n        self.wait(2)\n```"
     },
-    "53436c4e-5fb7-4b5d-8cb7-c8726a5e34df": {
-        "title": "Vector-Matrix Multiplication",
-        "description": "Align the vector with the first column of the matrix, then multiply each element of the vector with the corresponding element in the first column, summing the results to get the first element of the resulting vector.",
-        "id": "53436c4e-5fb7-4b5d-8cb7-c8726a5e34df",
+    "68e02ed4-1d2d-497f-ac64-56207f81ff4f": {
+        "title": "Numerical Vector Addition",
+        "description": "Display the numerical method of vector addition, showing the breakdown into component form and then the sum of the respective components. Use labels and visual aids to help deepen understanding of the process.",
+        "id": "68e02ed4-1d2d-497f-ac64-56207f81ff4f",
         "data": {
-            "narration": "To multiply a matrix by a vector, we align the vector with the first column of the matrix, then multiply each element of the vector with the corresponding element in the first column, summing the results to get the first element of the resulting vector.",
-            "animation-description": "A 2D matrix with dimensions 2x3 is displayed on the left side of the screen. A number line is centered vertically on the right side of the screen, ranging from -10 to 10 with ticks for every 0.2. A blue arrow is positioned above the number line, initially pointing from 0 to +5. The arrow then shrinks until it points to +2.",
-            "free-response-question": "Describe the process of multiplying a matrix and a vector.",
-            "free-response-answer": "To multiply a matrix and a vector, you align the vector with the first column of the matrix, then multiply each element of the vector with the corresponding element in the first column, summing the results to get the first element of the resulting vector. This process is repeated for each column in the matrix, resulting in a new vector.",
-            "multiple-choice-question": "What is the first step in multiplying a matrix and a vector?",
+            "narration": "Let's break these vectors down into their parts. Now, one vector's components are here, the other vector's components are over there. Adding them up is simply a matter of adding along each axis, which gives us the sums that form our resultant vector.",
+            "animation-description": "The scene starts with two vectors displayed in x-y plane, each vector labeled with its component form. These vectors are then split to their individual components, forming parallel lines along the x-axis and y-axis. The vectors then move and align such that it is clear that vector addition happens piece-wise. The scene then transitions to depict addition of respective components, forming a new vector that represents the sum. This resultant vector is labelled with its component values.",
+            "free-response-question": "A vector has components (3, 5) and another vector has components (-1, 2). What is the resultant vector when these two are added together?",
+            "free-response-answer": "(2, 7)",
+            "multiple-choice-question": "What happens when we add two vectors together?",
             "multiple-choice-choices": [
-                "Align the vector with the first column of the matrix",
-                "Multiply each element of the vector with the corresponding element in the first column and summing the results",
-                "Repeat the process for each column in the matrix",
-                "All of the above"
+                "Their respective components are added",
+                "Their magnitudes are added",
+                "Their directions are combined",
+                "Their components are multiplied"
             ]
         },
-        "code": " from manim import *\n\nclass MatrixVectorMultiplication(Scene):\n    def construct(self):\n        # Define the matrix\n        matrix = Matrix([\n            [3, 2, 7],\n            [6, 9, 1]\n        ])\n\n        # Define the vector\n        vector = Matrix([\n            [2],\n            [5]\n        ])\n\n        # Define the number line\n        number_line = NumberLine(\n            x_min=-10, x_max=10,\n            unit_size=2,\n            number_to_track_decimal_places=2\n        )\n\n        # Define the arrow\n        arrow = Arrow(\n            number_line.number_to_graph(0),\n            number_line.number_to_graph(5),\n            color=BLUE,\n            stroke_width=3,\n            buff=0\n        )\n\n        # Animate the arrow shrinking\n        self.play(\n            Create(matrix),\n            Create(vector),\n            Create(number_line),\n            Create(arrow),\n            run_time=2\n        )\n\n        self.play(\n            arrow.animate(end=number_line.number_to_graph(2)),\n            run_time=2\n        )\n\n        # Animate the multiplication\n        self.play(\n            Transform(vector, matrix.column(1)),\n            run_time=2\n        )\n\n        self.wait(1)"
+        "code": "```python\nfrom manim import *\n\nclass VectorAddition(Scene):\n    def construct(self):\n        # Initial vectors\n        vec_a = Arrow(ORIGIN, [2, 1, 0], buff=0, color=YELLOW)\n        vec_b = Arrow(ORIGIN, [1, 2, 0], buff=0, color=BLUE)\n        self.play(ShowCreation(vec_a), ShowCreation(vec_b))\n\n        # Vector labels\n        label_a = MathTex(r\"\\vec{a} = \\langle 2,1 \\rangle\", font_size=24).next_to(vec_a, RIGHT)\n        label_b = MathTex(r\"\\vec{b} = \\langle 1,2 \\rangle\", font_size=24).next_to(vec_b, UP)\n        self.play(Write(label_a), Write(label_b))\n\n        # Decomposing vectors into components\n        vec_a_x = Arrow(ORIGIN, [vec_a.get_end()[0], 0, 0], buff=0, color=YELLOW)\n        vec_a_y = Arrow(ORIGIN, [0, vec_a.get_end()[1], 0], buff=0, color=YELLOW)\n        vec_b_x = Arrow(ORIGIN, [vec_b.get_end()[0], 0, 0], buff=0, color=BLUE)\n        vec_b_y = Arrow(ORIGIN, [0, vec_b.get_end()[1], 0], buff=0, color=BLUE)\n        self.play(Transform(vec_a, vec_a_x), Transform(vec_b, vec_b_x))\n        self.wait(1)\n        self.play(Transform(vec_a, vec_a_y), Transform(vec_b, vec_b_y))\n        self.wait(1)\n    \n        # Aligning vectors for addition\n        self.play(vec_a.animate.next_to(vec_b, RIGHT))\n        self.wait(1)\n\n        # Vector addition\n        vec_sum = Arrow(ORIGIN, np.array(vec_a.get_end()) + np.array(vec_b.get_end()), buff=0, color=GREEN)\n        self.play(ReplacementTransform(vec_a, vec_sum), ReplacementTransform(vec_b, vec_sum))\n        vec_sum_label = MathTex(r\"\\vec{a} + \\vec{b} = \\langle 3,3 \\rangle\", font_size=24).next_to(vec_sum, RIGHT)\n        self.play(Write(vec_sum_label))\n        self.wait(1)\n```\nThis code first creates two vectors `\\vec{a}` and `\\vec{b}` and their respective labels. It then decomposes these vectors into their x and y components (along the x-axis and y-axis). Afterwards, these components are aligned and added together to form the sum vector `\\vec{a} + \\vec{b}`. The resulting vector and its label are then displayed. The `wait` functions are used to insert pauses between the animations.\n"
     },
-    "3b666767-0d93-4c98-ac76-f9b45076bbf7": {
-        "title": "Resulting Vector",
-        "description": "Repeat the previous step for the second column of the matrix, and show the resulting vector as the product of the vector-matrix multiplication.",
-        "id": "3b666767-0d93-4c98-ac76-f9b45076bbf7",
+    "ecd1ce1e-41cb-4c45-807f-d507a77edcab": {
+        "title": "Practical Application",
+        "description": "End with a simple real-world example of vector addition. This could be forces combining together to generate a greater force. Show the vectors of the two separate forces, and their resultant vector to reinforce the concept in a practical sense.",
+        "id": "ecd1ce1e-41cb-4c45-807f-d507a77edcab",
         "data": {
-            "narration": "Now let's take a look at what happens when we multiply a vector by a matrix. We'll start with the first column of the matrix.",
-            "animation-description": "Show a 2x2 matrix with entries -3, 2, 5, 1. Highlight the first column of the matrix. Show a vector <1, 2> on the left side of the screen, above the matrix. Animate the vector being multiplied by the first column of the matrix, with the resulting vector <-3*1 + 2*2, 5*1 + 1*2> = <1, 6> displayed on the right side of the screen.",
-            "free-response-question": "What is the result of multiplying a vector by a matrix?",
-            "free-response-answer": "When multiplying a vector by a matrix, each element in the vector is multiplied by the corresponding elements in the matrix, and the resulting values are added together to give the resulting vector.",
-            "multiple-choice-question": "What is the resulting vector of multiplying the vector <1, 2> by the matrix [[-3, 2], [5, 1]]?",
+            "narration": "Now, let's consider a real-world application of vector addition. Think about forces acting on an object, say, two pushes in the same direction. Each push is a separate force vector. When combined, they result in a much larger force in the same direction, represented by the resultant vector.",
+            "animation-description": "Position initially two arrow vectors at the origin pointing in positive x direction, each labeled as F1 and F2 respectively. The resultant vector F (F1+F2) would also be shown positioned at the origin and extending further in the positive x direction. The individual vectors F1 and F2 would then animate, moving tip-to-tail to display vector addition while the resultant vector F remains at the origin. End the scene with all three vectors displayed from the same starting point at the origin for comparison.",
+            "free-response-question": "What happens to the magnitude of the resultant vector if both force vectors are pushed in the opposite direction?",
+            "free-response-answer": "Pushing the force vectors in the opposite direction would decrease the magnitude of the resultant vector.",
+            "multiple-choice-question": "In terms of vector addition, if two forces of equal magnitude push in opposite directions, the resultant vector represents what kind of force?",
             "multiple-choice-choices": [
-                "<1, 6>",
-                "<6, 1>",
-                "<-3, 5>",
-                "<-6, -1>"
+                "No force",
+                "A force greater than the individual forces",
+                "A force equal to one of the individual forces",
+                "A force less than the individual forces"
             ]
         },
-        "code": " from manim import *\n\nclass VectorMatrixMultiplication(Scene):\n    def construct(self):\n        # Define the matrix\n        matrix = Matrix([[-3, 2],\n                         [5, 1]])\n\n        # Highlight the first column of the matrix\n        matrix.get_entries()[0].set_color(YELLOW)\n\n        # Define the vector\n        vector = Vector(\n            [1, 2],\n            stroke_color=BLUE,\n            stroke_width=4,\n            stroke_opacity=1,\n            fill_opacity=0,\n            color=BLUE,\n            fill_color=BLUE,\n            length=2,\n            unit_size=1.5\n        )\n\n        # Define the resulting vector\n        result_vector = Vector(\n            [1, 6],\n            stroke_color=GREEN,\n            stroke_width=4,\n            stroke_opacity=1,\n            fill_opacity=0,\n            color=GREEN,\n            fill_color=GREEN,\n            length=2,\n            unit_size=1.5\n        )\n\n        # Create a title\n        title = TextMobject(\"Vector Matrix Multiplication\",\n                            font_size=20,\n                            weight=BOLD)\n        title.to_edge(UP)\n\n        # Create a subtitle\n        subtitle = TextMobject(\"Matrix x Vector\",\n                              font_size=16,\n                              color=YELLOW)\n        subtitle.next_to(title, DOWN)\n\n        # Arrange the matrix and vector\n        matrix_vector_group = VGroup(matrix, vector).arrange(RIGHT, buff=1)\n        matrix_vector_group.to_edge(RIGHT, buff=1)\n\n        # Arrange the result vector and matrix\n        result_matrix_vector_group = VGroup(result_vector, matrix).arrange(RIGHT, buff=1)\n        result_matrix_vector_group.to_edge(LEFT, buff=1)\n\n        # Show the title and subtitle\n        self.play(\n            Write(title),\n            Write(subtitle)\n        )\n\n        # Show the matrix, vector, and resulting vector\n        self.play(\n            Create(matrix_vector_group),\n            Create(result_matrix_vector_group)\n        )\n\n        # Animate the vector being multiplied by the first column\n        self.play(\n            vector.animate(rate_func=linear, run_time=2).move_to(result_vector)\n        )\n\n        # Wait for a bit\n        self.wait(1)\n\n        # Remove the matrix, vector, and resulting vector\n        self.play(\n            Uncreate(matrix_vector_group),\n            Uncreate(result_matrix_vector_group)\n        )\n\n        # Remove the title and subtitle\n        self.play(\n            Unwrite(title),\n            Unwrite(subtitle)\n        )"
-    },
-    "509e73fa-69d1-422d-ba65-6a544da6f4ba": {
-        "title": "Numerical Example",
-        "description": "Perform the vector-matrix multiplication numerically, showing each step and the final calculation.",
-        "id": "509e73fa-69d1-422d-ba65-6a544da6f4ba",
-        "data": {
-            "narration": "Let's perform a vector-matrix multiplication. We'll do it step by step.",
-            "animation-description": "A number line is displayed centered vertically on the screen, ranging from -10 to 10 with ticks every 0.2. A blue arrow points from 0 to +5 above the number line. The arrow gradually shrinks until it points to +2.",
-            "free-response-question": "Now that you've seen an example of vector-matrix multiplication, try it out with a different vector and matrix. Show your work.",
-            "free-response-answer": "The correct answer will vary depending on the specific vector and matrix used.",
-            "multiple-choice-question": "What is the resulting vector when performing the vector-matrix multiplication?",
-            "multiple-choice-choices": [
-                "(-2, 10, 1)",
-                "(2, -10, 1)",
-                "(-2, -10, 1)",
-                "(2, 10, -1)"
-            ]
-        },
-        "code": " from manim import *\n\nclass VectorMatrixMultiplication(Scene):\ndef construct(self):\nnumber\\_line = NumberLine(x\\_min = -10, x\\_max = 10,\nunit\\_size = 2,\nnumbers_with_elongated_ticks = range(-9, 11))\n\nnumber\\_line.add\\_numbers(font\\_size = 20)\n\nvector\\_arrow = Arrow(ORIGIN, [2, 0, 0],\nstroke\\_width = 3,\nstroke\\_color = BLUE,\ntip\\_style = \"box\",\ntip\\_size = 0.3)\n\nnumber\\_line.add(vector\\_arrow)\n\nself.play(Create(number\\_line))\nself.play(Create(vector\\_arrow))\n\nvector\\_arrow.set\\_end\\_and\\_updated\\_tip([5 / 2, 0, 0])\nself.play(MoveAlongPath(vector\\_arrow, path\\_arc = PI / 4))\n\nself.wait(1)\n\nnumber\\_line.remove(vector\\_arrow)\n\nself.wait(1)"
-    },
-    "ea961601-6818-4e16-b45f-6772da1f381b": {
-        "title": "Practical Example",
-        "description": "Provide a real-world example of vector-matrix multiplication, such as transforming a vector in 2D space using a transformation matrix.",
-        "id": "ea961601-6818-4e16-b45f-6772da1f381b",
-        "data": {
-            "narration": "Imagine you're a painter, and you want to move a certain distance along your 2D canvas. Let's say you want to move 3 units to the right and 4 units up. In vector notation, this can be represented as the vector (3, 4). Now, let's say you want to rotate this vector by 90 degrees clockwise. To do this, you'll need to use a transformation matrix.",
-            "animation-description": "Start with a 2D plane and a vector pointing from the origin (0,0) to the point (3,4). Show a circle around the origin to indicate rotation. Then, display a transformation matrix with the values -1, 0, and 0, 1. Apply the transformation matrix to the vector, resulting in a new vector pointing from the origin to the point (-4, 3).",
-            "free-response-question": "How would the vector (3, 4) change if it were rotated 180 degrees clockwise instead of 90 degrees?",
-            "free-response-answer": "The vector (3, 4) would be transformed to the point (-3, -4).",
-            "multiple-choice-question": "What is the result of rotating the vector (3, 4) 90 degrees clockwise?",
-            "multiple-choice-choices": [
-                "(-4, 3)",
-                "(4, -3)",
-                "(3, 4)",
-                "(-3, 4)"
-            ]
-        },
-        "code": "from manim import *\n\nclass VectorRotation(Scene):\n    def construct(self):\n        plane = NumberPlane()\n        vector = arrow((0, 0), (3, 4), color=YELLOW)\n        origin = dot((0, 0), color=YELLOW)\n        circle = Circle(radius=0.2, color=YELLOW)\n        circle.move_to(origin)\n\n        matrix = matrix([[-1, 0], [0, 1]])\n        matrix_label = matrix.get_entries_labels()\n\n        self.play(Create(plane), run_time=0.5)\n        self.play(Create(vector), Create(origin), run_time=0.5)\n        self.play(Create(circle), run_time=0.5)\n\n        self.play(Transform(origin, matrix), run_time=0.5)\n        self.play(Transform(vector, matrix), run_time=0.5)\n        self.play(Write(matrix_label), run_time=0.5)\n\n        self.wait(1)\n\n        rotated_vector = arrow((0, 0), (-4, 3), color=YELLOW)\n\n        self.play(Transform(vector, rotated_vector), run_time=0.5)\n\n        self.wait(1)"
+        "code": "```python\nfrom manim import *\n\nclass VectorAddition(Scene):\n    def construct(self):\n\n        # Creating vectors F1, F2, and F\n        F1 = Arrow(ORIGIN, RIGHT * 2, color=YELLOW)\n        F1_text = MathTex(\"F_1\", color=YELLOW).scale(0.6).next_to(F1.get_end(), RIGHT)\n        F2 = Arrow(ORIGIN, RIGHT * 3, color=GREEN)\n        F2_text = MathTex(\"F_2\", color=GREEN).scale(0.6).next_to(F2.get_end(), RIGHT)\n        F = Arrow(ORIGIN, RIGHT * 5, color=RED)\n        F_text = MathTex(\"F\", color=RED).scale(0.6).next_to(F.get_end(), RIGHT)\n\n        # Grouping and positioning vectors\n        vectors_group = VGroup(F1, F2, F)\n        vectors_group.arrange(buff=-1).to_edge(LEFT, buff=1)\n        vectors_text = VGroup(F1_text, F2_text, F_text)\n\n        # Animation\n        self.play(Write(F1), Write(F1_text))\n        self.play(Write(F2.mover_to(F1.get_end())), Write(F2_text.next_to(F2, RIGHT)))\n        self.play(Write(F), Write(F_text))\n        self.wait(1)\n        self.play(\n            F1.animate.shift(F2.get_end()), F1_text.animate(next_to(F1.get_end(), RIGHT)),\n            F2.animate.move_to(ORIGIN), F2_text.animate(next_to(F2.get_end(), RIGHT)),\n            run_time=2,\n        )\n        self.wait(1)\n        self.play(F2.animate.next_to(F1, buff=0), F2_text.animate.next_to(F2.get_end(), RIGHT), run_time=2)\n        self.wait(1)\n        self.play(\n            FadeOut(F1), FadeOut(F1_text),\n            F2.animate.move_to(ORIGIN), F2_text.animate(next_to(F2.get_end(), RIGHT)),\n            run_time=2,\n        )\n        self.wait(1)\n\n        self.play(FadeOut(F2), FadeOut(F2_text), run_time=1)\n        self.wait(1)\n```\n\nThis Manim code creates the described scene. Two vector arrows F1 and F2 are displayed along the x-axis, representing the individual forces. Another arrow F, showing the combined force of F1 and F2, appears further along the x-axis. Then the vectors F1 and F2 animate to show vector addition, maintaining their labels to clarify their positions. They arrange themselves tip-to-tail. The combined force F remains at the origin throughout the animation. All vectors end up stacked at the same origin point by the end of the animation."
     }
 }

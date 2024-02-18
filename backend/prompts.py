@@ -26,7 +26,7 @@ Ensure that the json is valid.
 The title should be short, limit of 5 words
 The description should be a few sentences, enough for someone to understand what to do and how to animate and explain this frame.
 
-Output only the json format of the frames. DO NOT INCUDE A PREABMBLE OR POSTAMBLE.
+Output only the plaintext json format of the frames. DO NOT OUTPUT MARKDOWN. DO NOT INCUDE A PREABMBLE OR POSTAMBLE.
 """
 
 
@@ -39,7 +39,7 @@ The animation description should be descriptive of what should be shown on the s
 
 In addition, generate a 4 choice multiple choice question and a free response question that can be asked at the end of the video.
 
-The corrent answer for the multiple choice should always be the first in the array. The answer for the free response should be a string.
+The correct answer for the multiple choice should always be the first in the array. The answer for the free response should be a string.
 
 Return the data in the following format:
 
@@ -52,11 +52,11 @@ Return the data in the following format:
 "multiple-choice-choices": ["answer - string", "wrong - string", "wrong - string", "wrong - string"],
 }}
 
-THE RESPONSE SHOULD ONLY A VALID JSON FORMAT. DO NOT INCLUDE A PREABMBLE OR POSTAMBLE.
+THE RESPONSE SHOULD ONLY A VALID PLAINTEXT JSON FORMAT. DO NOT OUTPUT MARKDOWN. DO NOT INCLUDE A PREABMBLE OR POSTAMBLE.
 """
 
 ANIMATION_PROMPT = """
-1. Given the scene description, write manim (CE) code for this scene in 3blue1brown style.
+1. Given the scene description, write manim (CE) code for this scene in 3blue1brown style. This scene should be between 5 and 10 seconds.
 2. Make sure that the any LaTeX equations are rendered correctly.
 3. Make sure that the font_size is small (< 25pt).
 4. Make sure no manim objects have the same y coordinate to ensure no overlapping.
@@ -77,6 +77,24 @@ Animation Description:
 {}
 
 ONLY RETURN THE MANIM CODE FOR THE SCENE. DO NOT INCLUDE A PREABMBLE OR POSTAMBLE.
+"""
+
+FEEDBACK_PROMPT = """
+Step by step
+1. Briefly discuss how to address the feedback.
+2. Write out the whole code in one chunk in ```python ``` (Markdown). Otherwise it will not be accepted.
+3. After generating the code, don't forget to write down a list of your completed tasks and your remaining TODOs from the previous section.
+"""
+
+ERROR_PROMPT = """
+Step by step
+1. Check your work. Twice.
+2. Check if the animation neccessary?
+3. Make sure no objects are overlapping.
+4. Does your animation support what is explained in the narration?
+5. Briefly discuss how to address the error.
+6. Write out the whole code in one chunk in ```python ``` (Markdown). Otherwise it will not be accepted.
+7. After generating the code, don't forget to write down a list of your completed tasks and your remaining TODOs from the previous section.
 """
 
 CHECK_ANSWER_PROMPT = """

@@ -14,6 +14,7 @@ import uuid
 import aiohttp
 
 import pathlib
+import textwrap
 
 import subprocess
 
@@ -21,26 +22,15 @@ import time
 
 # Event loop for querying each scene
 
-queue = asyncio.Queue()
-
-
-async def process_queue():
-    while True:
-        item = await queue.get()
-        await generate_scene(item)
-        queue.task_done()
-
-
-loop = asyncio.get_event_loop()
-loop.create_task(process_queue())
-
 app = FastAPI()
 
 
 config = toml.load("config.toml")
 
 
-async def generate_scene(item):
+async def generate_scene(item, i=0):
+    if i > 4:
+        return
     print("Generating scene: ", item["id"], item["title"])
 
     if item["id"] not in scenes:
@@ -53,7 +43,7 @@ async def generate_scene(item):
 
     print(scene_query)
 
-    scene_response = await async_query_llm(scene_query, False)
+    scene_response = query_gpt(scene_query, False, True)
 
     print(scene_response)
 
@@ -62,9 +52,9 @@ async def generate_scene(item):
     while not work:
         try:
             print("Trying to parse JSON...")
-            text = scene_response["text"][0]
+            text = scene_response
             # remove everything before the first {
-            text = text[text.index("{") :]
+            text = text[text.index("{"):]
             # remove everything after the last }
             text = text[: text.rindex("}") + 1]
             print(text)
@@ -72,15 +62,15 @@ async def generate_scene(item):
             work = True
 
         except json.JSONDecodeError as e:
-            scene_query += (
-                "\n\n"
-                + scene_response["text"][0]
-                + "\n\nTHIS IS NOT VALID JSON. PLEASE FIX IT. RETURN ONLY A VALID JSON FORMAT."
-            )
+            # scene_query += (
+            #     "\n\n"
+            #     + scene_response["text"][0]
+            #     + "\n\nTHIS IS NOT VALID JSON. PLEASE FIX IT. RETURN ONLY A VALID JSON FORMAT."
+            # )
 
             print("Invalid JSON")
             print(scene_query)
-            scene_response = await async_query_llm(scene_query, False)
+            # scene_response = await query_gpt(scene_query, False)
 
     scenes[item["id"]]["data"] = scene_data
 
@@ -92,16 +82,16 @@ async def generate_scene(item):
 
     print(animation_query)
 
-    animation_response = await async_query_llm(animation_query, False)
+    animation_response = query_gpt(animation_query, False, True)
     # todo: deal with fine tuning = true
 
     print(animation_response)
 
-    animation_code = animation_response["text"][0]
+    animation_code = animation_response
     scenes[item["id"]]["code"] = animation_code
 
     # Generate the video
-    await generate_video(item["id"])
+    await generate_video(item["id"], i)
 
     # Write the data to a file
     with open("scenes.json", "w") as f:
@@ -109,14 +99,18 @@ async def generate_scene(item):
 
 
 @app.get("/api/generate")
-async def generate_video(item_id: str):
+async def generate_video(item_id: str, i=0):
+    if i > 4:
+        print("FAILED FOUR TIMES")
+        return
     print("Generating video: ", item_id)
-
-    scenes = json.load(open("scenes.json"))
+    global scenes
+    # scenes = json.load(open("scenes.json"))
     # Generate the video from the code
 
     with open(f"scene_code/scene_{item_id}.py", "w") as f:
-        f.write(scenes[item_id]["code"].strip())
+        f.write('from manim import *\nconfig.background_color = "#0F172A"\n' +
+                textwrap.dedent(scenes[item_id]["code"]).rstrip()[10:-3])
 
     # Run the manim command
     try:
@@ -129,9 +123,10 @@ async def generate_video(item_id: str):
         command = [
             "manim",
             f"scene_code/scene_{item_id}.py",
-            "-ql",
+            "-pql",
             "-o",
-            pathlib.Path(__file__).parent() / "scene_code" / f"scene_{item_id}",
+            pathlib.Path(__file__).parent /
+            "scene_code" / f"scene_{item_id}",
         ]
         result = subprocess.run(command, capture_output=True, text=True)
 
@@ -142,6 +137,11 @@ async def generate_video(item_id: str):
         print("Error: ", e)
         print(e.stderr)
         print("llll")
+    finally:
+        if not os.path.exists(f"scene_code/scene_{item_id}.mp4"):
+            await generate_scene(scenes[item_id], i + 1)
+
+            
     # todo: deal with what happens when it errors out
 
     print("done")
@@ -246,18 +246,18 @@ def query_llm(prompt: str, is_code: bool = False):
         verify=False,
     )
 
-    return response.json()
+    return json.loads(response.json())
 
 
-def query_gpt(prompt: str):
+def query_gpt(prompt: str, temp=False, is_manim=False):
     # model = "mixtral" if is_code else "codellama"
 
     payload_body = {
-        "model": "gpt-3.5-turbo",
+        "model": "gpt-4",
         "messages": [
             {
                 "role": "system",
-                "content": "You are a helpful assistant for automating responses.",
+                "content": "You are a 3blue1brown assistant. You are helping 3blue1brown to generate a scene for his next video. You are proficient in manim and very capable. DO NOT DOUBT YOURSELF." if is_manim else "You are an assistant to generate JSON code.",
             },
             {"role": "user", "content": prompt},
         ],
@@ -297,18 +297,18 @@ scenes = {}
 @app.get("/api/init/")
 async def init(audience: str = "high school student", concept: str = "vector addition"):
     global scenes
-    with open("./scenes.json", "r") as r:
-        scene = json.load(r)  # d
-        scenes = scene
+    # with open('./scenes.json', 'r') as r:
+    #     scene = json.load(r)  # d
+    #     scenes = scene
 
-    time.sleep(0.5)  # d
+    # time.sleep(0.5)  # d
 
-    return list(scene.values())  # d
+    # return list(scene.values())  # d
     formatted_prompt = prompts.STORYBOARD_PROMPT.format(audience, concept)
 
     print(formatted_prompt)
 
-    response = query_llm(formatted_prompt, False)
+    response = json.loads(query_gpt(formatted_prompt, False))
 
     print(response)
 
@@ -320,36 +320,37 @@ async def init(audience: str = "high school student", concept: str = "vector add
     storyboard_query_save.append(query_save)
 
     # storyboards = json.loads(response["text"][0])["frames"]
-    valid = False
+    valid = True
 
     while not valid:
         try:
             print("Trying to parse JSON...")
+            print(response.keys())
             text = response["text"][0]
             # remove everything before the first {
-            text = text[text.index("{") :]
+            text = text[text.index("{"):]
             # remove everything after the last }
             text = text[: text.rindex("}") + 1]
             print(text)
             storyboards = json.loads(text)["frames"]
             valid = True
         except json.JSONDecodeError as e:
-            formatted_prompt += (
-                "\n\n"
-                + response["text"][0]
-                + "\n\nTHIS IS NOT VALID JSON. PLEASE FIX IT. RETURN ONLY A VALID JSON FORMAT."
-            )
+            # formatted_prompt += (
+            #     "\n\n"
+            #     + response["text"][0]
+            #     + "\n\nTHIS IS NOT VALID JSON. PLEASE FIX IT. RETURN ONLY A VALID JSON FORMAT."
+            # )
             print("Invalid JSON")
             print(formatted_prompt)
-            response = query_llm(formatted_prompt, False)
+            # response = query_llm(formatted_prompt, False)
 
-    # storyboards = json.loads(response["text"][0])["frames"]
+    storyboards = response["frames"]
 
     for storyboard in storyboards:
         id = str(uuid.uuid4())
         scenes[id] = storyboard
         storyboard["id"] = id
-        queue.put_nowait(storyboard)
+        asyncio.create_task(generate_scene(storyboard))
 
     return storyboards
 
@@ -375,10 +376,11 @@ async def video(scene_id: str):
         return {"error": "Scene not found"}
 
     # check if the video exists
-    if not os.path.exists(f"scene_{scene_id}.mp4"):
+    # assert os.path.exists('scene_code/scene_9eb1415b-870e-4519-8beb-f2d01385ce6a.mp4')
+    if not os.path.exists(f"scene_code/scene_{scene_id}.mp4"):
         return {"error": "Video not found"}
 
-    return fastapi.responses.FileResponse(f"scene_{scene_id}.mp4")
+    return fastapi.responses.FileResponse(f"scene_code/scene_{scene_id}.mp4")
 
 
 # check freeform text answers

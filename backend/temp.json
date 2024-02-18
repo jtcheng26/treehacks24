@@ -1,0 +1,22 @@
+[
+  {
+    "title": "Introduce Vectors",
+    "description": "Begin with showing two distinct vectors originating from the same point, termed as the origin. These vectors represent any arbitrary direction and magnitude to introduce the concept of vector addition.",
+    "id": "1be44fd1-07c7-428d-8dac-6121fa10ea7d"
+  },
+  {
+    "title": "Tip to Tail Method",
+    "description": "Animate the movement of the second vector to position its tail at the tip of the first vector. Then, draw a new vector (resultant vector) from the origin to the tip of the second vector, visually demonstrating the tip-to-tail method of vector addition.",
+    "id": "64bbe688-50c2-4dce-8476-f4bcff08b885"
+  },
+  {
+    "title": "Numerical Addition",
+    "description": "Show how vector addition can also be done numerically by adding their corresponding components. Use a simple example with numerical values to clarify the concept, illustrating how each component of the vectors is added to get the resultant vector.",
+    "id": "1dfa267f-4a7b-4ad6-a4da-40e8e74481df"
+  },
+  {
+    "title": "Practical Example",
+    "description": "Provide a real-life scenario such as two forces acting on an object in different directions. Explain how vector addition combines these forces into one larger force, demonstrating the practical application of vector addition.",
+    "id": "f4158b77-d967-471c-b491-bca215eff179"
+  }
+]

@@ -154,6 +154,7 @@ export default function useManim(user: string, topic: string) {
         isReady: true,
         video: file,
       };
+      console.log("ready", id);
       setState((state) => ({
         ...state,
         sections: state.sections.map((s) =>
@@ -186,48 +187,63 @@ export default function useManim(user: string, topic: string) {
       // TODO: query api
       (async () => {
         const storyboards = await getStoryboards(user, topic);
-
+        console.log(storyboards);
         const sections = storyboards.map((s, i) => {
-          const mc = i % 2 == 0; // alternate mc/fr
-          const cs = s.data["multiple-choice-choices"].map((c, i) => ({
-            correct: i == 0,
-            choice: c,
-          }));
-
-          shuffleArray(cs);
-
-          let answer = 0;
-          for (let i = 1; i < cs.length; i++) if (cs[i].correct) answer = i;
-
-          const sec: Partial<Section> = {
+          const sec: Section = {
             title: s.title,
             id: s.id,
             progressState: initialProgressState,
             video: "",
             ready: false,
+            question: {
+              type: "text",
+              data: {
+                question: "Is this helpful?",
+              },
+            },
           };
-          sec.question = mc
-            ? {
-                type: "mc",
-                data: {
-                  question: s.data["multiple-choice-question"],
-                  choices: cs.map((c) => c.choice),
-                  answer: answer,
-                },
-              }
-            : {
-                type: "text",
-                data: {
-                  question: s.data["free-response-question"],
-                },
-              };
+
+          // const sections = storyboards.map((s, i) => {
+          //   const mc = i % 2 == 0; // alternate mc/fr
+          //   const cs = s.data["multiple-choice-choices"].map((c, i) => ({
+          //     correct: i == 0,
+          //     choice: c,
+          //   }));
+
+          //   shuffleArray(cs);
+
+          //   let answer = 0;
+          //   for (let i = 1; i < cs.length; i++) if (cs[i].correct) answer = i;
+
+          //   const sec: Partial<Section> = {
+          //     title: s.title,
+          //     id: s.id,
+          //     progressState: initialProgressState,
+          //     video: "",
+          //     ready: false,
+          //   };
+          //   sec.question = mc
+          //     ? {
+          //         type: "mc",
+          //         data: {
+          //           question: s.data["multiple-choice-question"],
+          //           choices: cs.map((c) => c.choice),
+          //           answer: answer,
+          //         },
+          //       }
+          //     : {
+          //         type: "text",
+          //         data: {
+          //           question: s.data["free-response-question"],
+          //         },
+          //       };
           return sec as Section;
         });
-
-        setState({ ready: true, sections: sections });
         sections.forEach((s) => {
           pingId(s.id);
         });
+        setState({ ready: true, sections: sections });
+
       })();
 
       // setTimeout(() => {
