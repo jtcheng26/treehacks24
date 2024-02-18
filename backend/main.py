@@ -22,13 +22,16 @@ async def process_queue():
         queue.task_done()
 
 
-if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    loop.create_task(process_queue())
+loop = asyncio.get_event_loop()
+loop.create_task(process_queue())
 
 
 async def generate_scene(item):
     print("Generating scene: ", item["id"], item["title"])
+
+    if item["id"] not in scenes:
+        print("Creating new scene: ", item["id"])
+        scenes[item["id"]] = {}
     # item has, key, title and description
 
     # Generate the scene information
@@ -39,9 +42,33 @@ async def generate_scene(item):
     scene_response = await async_query_llm(scene_query, False)
 
     print(scene_response)
-    scene_data = json.loads(scene_response["text"][0])
 
-    scenes[item[item["id"]]]["data"] = scene_data
+    work = False
+
+    while not work:
+        try:
+            print("Trying to parse JSON...")
+            text = scene_response["text"][0]
+            # remove everything before the first {
+            text = text[text.index("{") :]
+            # remove everything after the last }
+            text = text[: text.rindex("}") + 1]
+            print(text)
+            scene_data = json.loads(text)
+            work = True
+
+        except json.JSONDecodeError as e:
+            scene_query += (
+                "\n\n"
+                + scene_response["text"][0]
+                + "\n\nTHIS IS NOT VALID JSON. PLEASE FIX IT. RETURN ONLY A VALID JSON FORMAT."
+            )
+
+            print("Invalid JSON")
+            print(scene_query)
+            scene_response = await async_query_llm(scene_query, False)
+
+    scenes[item["id"]]["data"] = scene_data
 
     # Generate the animation code
 
@@ -57,7 +84,7 @@ async def generate_scene(item):
     print(animation_response)
 
     animation_code = animation_response["text"][0]
-    scenes[item[item["id"]]]["code"] = animation_code
+    scenes[item["id"]]["code"] = animation_code
 
     # Generate the video
     generate_video(item["id"])
@@ -109,8 +136,8 @@ async def async_query_llm(prompt: str, is_code: bool = False):
         "presence_penalty": 0,
         "frequency_penalty": 0,
         "repetition_penalty": 1,
-        "temperature": 0.7,
-        "top_p": 1,
+        "temperature": 0.65,
+        "top_p": 0.9,
         "top_k": -1,
         "min_p": 0,
         "use_beam_search": False,
@@ -130,7 +157,8 @@ async def async_query_llm(prompt: str, is_code: bool = False):
             headers=headers,
             json=payload_body,
         ) as response:
-            return await json.loads(response.json())
+            data = await response.json()
+            return json.loads(data)
 
 
 def query_llm(prompt: str, is_code: bool = False):
@@ -198,11 +226,35 @@ async def init(audience: str = "high school student", concept: str = "vector add
     storyboard_query_save.append(query_save)
 
     # storyboards = json.loads(response["text"][0])["frames"]
-    storyboards = json.loads(response["text"][0])["frames"]
+    valid = False
+
+    while not valid:
+        try:
+            print("Trying to parse JSON...")
+            text = response["text"][0]
+            # remove everything before the first {
+            text = text[text.index("{") :]
+            # remove everything after the last }
+            text = text[: text.rindex("}") + 1]
+            print(text)
+            storyboards = json.loads(text)["frames"]
+            valid = True
+        except json.JSONDecodeError as e:
+            formatted_prompt += (
+                "\n\n"
+                + response["text"][0]
+                + "\n\nTHIS IS NOT VALID JSON. PLEASE FIX IT. RETURN ONLY A VALID JSON FORMAT."
+            )
+            print("Invalid JSON")
+            print(formatted_prompt)
+            response = query_llm(formatted_prompt, False)
+
+    # storyboards = json.loads(response["text"][0])["frames"]
 
     for storyboard in storyboards:
-        scenes[str(uuid.uuid4())] = storyboard
-        storyboard["id"] = str(uuid.uuid4())
+        id = str(uuid.uuid4())
+        scenes[id] = storyboard
+        storyboard["id"] = id
         queue.put_nowait(storyboard)
 
     return storyboards
@@ -210,6 +262,8 @@ async def init(audience: str = "high school student", concept: str = "vector add
 
 @app.get("/api/testing")
 async def testing(testing: str = "default testing string"):
+    print("running scene gen")
+
     return testing
 
 

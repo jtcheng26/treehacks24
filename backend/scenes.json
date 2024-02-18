@@ -1,0 +1,56 @@
+{
+    "6c37f180-7412-4f13-b4fc-367ab82976e3": {
+        "title": "Vector Definition",
+        "description": "Start with an arrow representing a vector, labeling the direction and magnitude.",
+        "id": "6c37f180-7412-4f13-b4fc-367ab82976e3",
+        "data": {
+            "narration": "Imagine a vector, represented by an arrow, with a magnitude of 5 and pointing in the positive direction. Let's visualize this on a number line, with the vector extending from zero to five. As time goes on, the vector will shrink, but its direction will remain the same.",
+            "animation-description": "Show a number line centered vertically on the screen, ranging from -10 to 10 with ticks for every 0.2. Above the number line, draw a large arrow pointing from 0 to +5. Then, gradually shrink the arrow until it points to +2.",
+            "free-response-question": "How does the direction of the vector change as it shrinks?",
+            "free-response-answer": "The direction of the vector does not change as it shrinks; it remains pointing in the same direction.",
+            "multiple-choice-question": "What happens to the magnitude of the vector as it shrinks?",
+            "multiple-choice-choices": [
+                "It remains the same",
+                "It increases",
+                "It decreases",
+                "It becomes negative"
+            ]
+        },
+        "code": "from manim import *\n\nclass VectorShrink(Scene):\n    def construct(self):\n        number\\_line = NumberLine(\n            x\\_min = -10,\n            x\\_max = 10,\n            number\\_of\\_marks = 50,\n            mark\\_size = 4,\n            label\\_direction = UP\n        )\n\n        initial\\_vector = Arrow(\n            ORIGIN,\n            [5, 0],\n            color = YELLOW,\n            stroke\\_width = 5,\n            stroke\\_color = YELLOW,\n            tip\\_length = 0.3,\n            tip\\_width = 0.3\n        )\n\n        shrink\\_vector = always\\_animate(\n            lambda v: v.set\\_endpoint(v.get\\_start() + 0.6 \\* v.get\\_unit\\_vector()),\n            run\\_time = 3\n        )(initial\\_vector)\n\n        self.add(number\\_line, initial\\_vector)\n        self.play(\n            ShowCreation(shrink\\_vector),\n            run\\_time = 3\n        )\n        self.remove(initial\\_vector)\n        self.add(shrink\\_vector)\n        self.wait(1)"
+    },
+    "c385d6fd-5e6b-4713-9a26-3bd1d3ba927d": {
+        "title": "Matrix Definition",
+        "description": "Introduce a 2x2 matrix with random values, labeling it as matrix A.",
+        "id": "c385d6fd-5e6b-4713-9a26-3bd1d3ba927d"
+    },
+    "6e904e34-56e4-4eea-bbe6-909793b14569": {
+        "title": "Vector Multiplication",
+        "description": "Begin multiplying the vector by the matrix by multiplying the first row of the matrix by the vector.",
+        "id": "6e904e34-56e4-4eea-bbe6-909793b14569"
+    },
+    "b35a6fed-02ea-491a-83d8-b58cfa352cb1": {
+        "title": "Multiplication Continued",
+        "description": "Move to the second row of the matrix and multiply it by the vector.",
+        "id": "b35a6fed-02ea-491a-83d8-b58cfa352cb1"
+    },
+    "ec2ce856-ac52-407e-9e63-a1f05619d486": {
+        "title": "Multiplication Completed",
+        "description": "Sum up the results of the previous multiplications to get the final resulting vector.",
+        "id": "ec2ce856-ac52-407e-9e63-a1f05619d486"
+    },
+    "b135c375-290c-423f-a981-577883346979": {
+        "title": "Visual Representation",
+        "description": "Show the multiplication visually by translating the vector according to the matrix multiplication.",
+        "id": "b135c375-290c-423f-a981-577883346979"
+    },
+    "fbd84c69-ef78-4f16-b7c8-12dc93cf59c5": {
+        "title": "Numerical Example",
+        "description": "Provide a numerical example of a vector multiplied by a matrix, showing the calculations step by step.",
+        "id": "fbd84c69-ef78-4f16-b7c8-12dc93cf59c5"
+    },
+    "1a19f8b5-06f0-4974-b34d-24cff82af844": {
+        "title": "Practical Application",
+        "description": "Explain how multiplying a vector by a matrix can be used in real life, such as in physics or computer graphics.",
+        "id": "1a19f8b5-06f0-4974-b34d-24cff82af844"
+    }
+}

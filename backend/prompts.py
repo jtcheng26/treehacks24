@@ -51,6 +51,8 @@ Return the data in the following format:
 "multiple-choice-question": "string",
 "multiple-choice-choices": ["answer - string", "wrong - string", "wrong - string", "wrong - string"],
 }}
+
+THE RESPONSE SHOULD ONLY A VALID JSON FORMAT. DO NOT INCLUDE A PREABMBLE OR POSTAMBLE.
 """
 
 ANIMATION_PROMPT = """
@@ -73,4 +75,6 @@ Narration: (given for additional context)
 
 Animation Description:
 {}
+
+ONLY RETURN THE MANIM CODE FOR THE SCENE. DO NOT INCLUDE A PREABMBLE OR POSTAMBLE.
 """
