@@ -4,8 +4,11 @@ import useManim from "../../hooks/useManim";
 import Player from "../player/Player";
 import ReplayButton from "../button/ReplayButton";
 import QuestionInput from "../input/QuestionInput";
-import QuizQuestion from "../practice/QuizQuestion";
+import MCQuizQuestion, { MCQuestionConfig } from "../practice/MCQuizQuestion";
 import ProgressBars from "../progress/ProgressBars";
+import TextQuizQuestion, {
+  TextQuestionConfig,
+} from "../practice/TextQuizQuestion";
 
 export const QuizConfig = {
   question: "What is the result of multiplying a 3x2 matrix by a 2x4 matrix?",
@@ -65,10 +68,14 @@ export default function Content({ user, topic, reset }) {
         } flex justify-center items-center transition-all duration-200`}
         style={{ zIndex: done ? 1000 : -10, opacity: done ? 1 : 0 }}
       >
-        <ReplayButton onClick={reset} visible={done} text='New Lesson' />
+        <ReplayButton onClick={reset} visible={done} text="New Lesson" />
       </div>
       <ScaleLoader loading={loading} color="#4EB389" />
-      <div className={"flex flex-col space-y-2 transition-all duration-100 overflow-hidden"}>
+      <div
+        className={
+          "flex flex-col space-y-2 transition-all duration-100 overflow-hidden"
+        }
+      >
         <div
           className={`w-full flex justify-center items-center h-[450px] ${
             loading ? "hidden" : "block"
@@ -80,11 +87,19 @@ export default function Content({ user, topic, reset }) {
             playerRef={playerRef}
             onProgress={handleProgress}
           />
-          <QuizQuestion
-            config={data[currentSection].question.data}
-            onAnswer={handleQuizAnswer}
-            visible={showQuestion}
-          />
+          {data[currentSection].question.type === "mc" ? (
+            <MCQuizQuestion
+              config={data[currentSection].question.data as MCQuestionConfig}
+              onAnswer={handleQuizAnswer}
+              visible={showQuestion}
+            />
+          ) : (
+            <TextQuizQuestion
+              config={data[currentSection].question.data as TextQuestionConfig}
+              onAnswer={handleQuizAnswer}
+              visible={showQuestion}
+            />
+          )}
         </div>
         <div className="w-full flex flex-row items-center space-x-4 justify-center pb-6">
           <ReplayButton onClick={handleReplay} visible={showReplay} />

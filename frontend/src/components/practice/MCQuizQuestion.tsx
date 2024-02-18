@@ -8,7 +8,7 @@ export interface MCQuestionConfig {
 
 const letterLabels = ["A", "B", "C", "D", "E"];
 
-export default function QuizQuestion({
+export default function MCQuizQuestion({
   config,
   onAnswer,
   visible,
@@ -41,9 +41,43 @@ export default function QuizQuestion({
       return "bg-primary text-green-700";
     else return "text-slate-600 opacity-50";
   }
-//   function iconLabel(i: number) {
-//     if (chosen)
-//   }
+  function iconLabel(i: number) {
+    if (chosen !== -1 && i === config.answer)
+      return (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={1.5}
+          stroke="currentColor"
+          className="w-6 h-6"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="m4.5 12.75 6 6 9-13.5"
+          />
+        </svg>
+      );
+    if (chosen === i && chosen !== config.answer)
+      return (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={1.5}
+          stroke="currentColor"
+          className="w-6 h-6"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M6 18 18 6M6 6l12 12"
+          />
+        </svg>
+      );
+    return letterLabels[i];
+  }
   return (
     <div
       className="flex flex-col space-y-1 transition-all duration-500 max-h-[470px]"
@@ -70,7 +104,7 @@ export default function QuizQuestion({
                 onClick={() => handleAnswer(i)}
               >
                 <span className={`mr-3 font-bold ${spanStyle(i)}`}>
-                  {letterLabels[i]}
+                  {iconLabel(i)}
                 </span>
                 {visible ? answer : ""}
               </div>

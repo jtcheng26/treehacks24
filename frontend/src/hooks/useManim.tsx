@@ -1,5 +1,6 @@
 import { QuizConfig } from "@/components/content/Content";
-import { MCQuestionConfig } from "@/components/practice/QuizQuestion";
+import { MCQuestionConfig } from "@/components/practice/MCQuizQuestion";
+import { TextQuestionConfig } from "@/components/practice/TextQuizQuestion";
 import { useEffect, useState } from "react";
 
 /*
@@ -20,8 +21,8 @@ export interface Section {
   };
   question: {
     // from backend
-    type: "mc";
-    data: MCQuestionConfig; // or other types
+    type: "mc" | "text";
+    data: MCQuestionConfig | TextQuestionConfig; // or other types
   };
   video: string; // or stream, from backend
   ready: boolean; // frontend
@@ -93,6 +94,24 @@ export default function useManim(user: string, topic: string) {
               ready: true,
             },
             {
+              title: "Vectors",
+              progressState: {
+                played: 0,
+                loaded: 0,
+                playedSeconds: 0,
+                loadedSeconds: 0,
+              },
+              question: {
+                type: "text",
+                data: {
+                  question:
+                    "Explain, in simple terms, the purpose of linear algebra.",
+                },
+              },
+              video: "/LinearAlgebraIntroLarge.mp4",
+              ready: true,
+            },
+            {
               title: "Matrices",
               progressState: {
                 played: 0,
@@ -102,16 +121,23 @@ export default function useManim(user: string, topic: string) {
               },
               question: {
                 type: "mc",
+                data: QuizConfig,
+              },
+              video: "/LinearAlgebraIntro.mp4",
+              ready: true,
+            },
+            {
+              title: "Outro",
+              progressState: {
+                played: 0,
+                loaded: 0,
+                playedSeconds: 0,
+                loadedSeconds: 0,
+              },
+              question: {
+                type: "text",
                 data: {
-                  question:
-                    "What is the result of multiplying a 2x5 matrix by a 5x2 matrix?",
-                  choices: [
-                    "5x5 matrix",
-                    "2x2 matrix",
-                    "2x5 matrix",
-                    "Cannot be multiplied",
-                  ],
-                  answer: 1,
+                  question: "What do matrix multiplications conceptualize?",
                 },
               },
               video: "/LinearAlgebraIntroLarge.mp4",
