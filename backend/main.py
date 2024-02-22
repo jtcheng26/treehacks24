@@ -22,12 +22,23 @@ import time
 
 from starlette.concurrency import run_in_threadpool
 
+from moviepy.editor import VideoFileClip, AudioFileClip
+from moviepy.editor import *
+
+
+
+
+
+
 # Event loop for querying each scene
 
 app = FastAPI()
 
 
 config = toml.load("config.toml")
+
+from elevenlabs import generate, play, save, set_api_key
+set_api_key(config["elevenlabs_api_key"])
 
 
 async def generate_scene(item, i=0, err=''):
@@ -161,7 +172,27 @@ async def generate_video(item_id: str, i=0, err = ''):
 
             return process.returncode, stdout.decode(), stderr.decode()
         exitcode, stdout, stderr = await run_command(command)
+        narration_text = scenes[item_id]["data"]["narration"]
+        audio_filename = f"scene_audio/scene_{item_id}.mp3"
+        
+        # Check if the audio file already exists to avoid regenerating it
+        if not os.path.exists(audio_filename):
+            print("Generating audio narration for: ", item_id)
+            # Assuming you have a function `generate_audio` that encapsulates the audio generation logic
+            audio = generate(
+                text=narration_text,
+                voice="Charlie",
+                model="eleven_multilingual_v1"
+            )
+        # Assuming you have a function `save_audio` to save the generated audio
+        save(audio, audio_filename)
+        video_clip = VideoFileClip(f"scene_code/scene_{item_id}.mp4")
+        audio_clip = AudioFileClip(audio_filename)
+        final_clip = video_clip.set_audio(audio_clip)
+    
 
+        final_video_filename = f"scene_code/scene_{item_id}.mp4"
+        final_clip.write_videofile(final_video_filename)
         print("EXITCODE", exitcode)
         print(stdout)
         print("STDERRRR", stderr)
